@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Random Formula Art — Example</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;display:flex;gap:20px;padding:18px}
+    main{max-width:980px}
+    textarea{width:100%;height:120px;font-family:monospace;font-size:14px}
+    label{display:block;margin-top:8px}
+    canvas{border:1px solid #ccc;display:block;margin-top:12px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .col{flex:1 1 300px}
+    button{padding:8px 12px}
+    .small{font-size:13px;color:#444}
+    .example{background:#f7f7f7;padding:8px;border-radius:6px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Random Formula Art — HTML Example</h1>
+    <p class="small">Type a formula using variables <code>x</code>, <code>y</code>, <code>i</code> (sample index), <code>t</code> (time in seconds). Operators supported: <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code> <code>^</code> <code>&</code> <code>|</code> <code><<</code> <code>>></code> and parentheses <code>( )</code>. Use the toggle to interpret <code>^</code> as power (x**y) or bitwise XOR.</p>
+
+    <label>Formula (the expression should return a numeric value or an array for RGB):</label>
+    <textarea id="formula">// Examples below (uncomment one):
+// Math.sin(10*(x*0.5+y*0.5)+i*0.02+t)
+// [ (Math.sin(10*x+t)+1)/2, (Math.sin(10*y - t)+1)/2, (Math.sin(10*(x+y)+i*0.005)+1)/2 ]
+// 0.5+0.5*Math.cos(10*(x^2 + y^2) + t)
+// ((x*10|0) ^ (y*10|0)) & 255
+
+(Math.sin(12*(x+y)+t) + Math.cos(14*(x-y)-t))
+</textarea>
+
+    <div class="controls">
+      <div class="col">
+        <label>Width × Height:</label>
+        <input id="w" type="number" value="600" style="width:120px"> ×
+        <input id="h" type="number" value="600" style="width:120px">
+
+        <label class="small">Interpret <code>^</code> as:</label>
+        <select id="caretMode">
+          <option value="power">power (**)</option>
+          <option value="xor">xor (bitwise ^)</option>
+        </select>
+
+        <label class="small">Seed (integer) — for deterministic randomness:</label>
+        <input id="seed" type="number" value="1234" style="width:120px">
+
+        <div style="margin-top:10px">
+          <button id="render">Render</button>
+          <button id="animate">Start animation</button>
+          <button id="stop" disabled>Stop</button>
+          <button id="download">Download PNG</button>
+        </div>
+
+        <div class="example">
+          <strong>Quick examples:</strong>
+          <ul>
+            <li><code>Math.sin(10*(x+y)+t)</code> — grayscale wave</li>
+            <li><code>[ (Math.sin(8*x+t)+1)/2, (Math.sin(8*y-t)+1)/2, (Math.sin(8*(x+y)+i*0.01)+1)/2 ]</code> — RGB
+            </li>
+            <li><code>((x*40|0) ^ (y*40|0)) & 255</code> — bity pattern</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Canvas:</label>
+        <canvas id="c" width="600" height="600"></canvas>
+        <div class="small" id="status"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Utility: convert user formula into a JS expression that can be evaluated.
+    // We do light preprocessing: replace ^ with ** or keep as ^ for XOR depending on caretMode.
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    const formulaInput = document.getElementById('formula');
+    const wIn = document.getElementById('w');
+    const hIn = document.getElementById('h');
+    const caretMode = document.getElementById('caretMode');
+    const seedIn = document.getElementById('seed');
+    const status = document.getElementById('status');
+
+    let animId = null;
+    let startTime = performance.now();
+
+    function setStatus(msg){ status.textContent = msg; }
+
+    // Simple deterministic PRNG (xoroshiro-like, not cryptographic)
+    function makeRNG(seed){
+      let s = seed >>> 0;
+      if(s === 0) s = 1;
+      return function(){
+        // xorshift32
+        s ^= s << 13; s >>>= 0;
+        s ^= s >>> 17; s >>>= 0;
+        s ^= s << 5; s >>>= 0;
+        return (s >>> 0)/4294967296;
+      }
+    }
+
+    function preprocess(expr){
+      // Remove leading/trailing whitespace
+      expr = expr.trim();
+      // Replace ^ with ** if power mode selected (so users can type ^ as power)
+      if(caretMode.value === 'power'){
+        // Avoid replacing bitwise XOR in contexts where user intended it — we treat ^ as power when selected.
+        // Replace only when ^ is used as infix between identifiers/numbers/parentheses
+        expr = expr.replace(/(\b\w+|\)|\d)\s*\^\s*(\(|\b\w+|\d)/g, (m,p1,p2)=> `${p1}**${p2}`);
+      }
+      return expr;
+    }
+
+    // Create evaluator function from expression string. It returns numeric value or [r,g,b]
+    function makeEvaluator(expr){
+      expr = preprocess(expr);
+      // Provide helper 'rand()' and 'seedRand()' within evaluation scope
+      const src = `
+        const randfn = __randfn;
+        const rand = ()=> randfn();
+        // clamp helper
+        const clamp = (v)=> Math.max(0, Math.min(1, v));
+        return (function(x,y,i,t){ try{
+          const v = ( ${expr} );
+          return v;
+        } catch(e){ return 0; }
+        }).bind(null);
+      `;
+
+      // Build a new Function with controlled globals: __randfn and Math will be passed in
+      try{
+        const factory = new Function('__randfn', 'Math', src);
+        return factory;
+      } catch(e){
+        setStatus('Error in expression (parsing): ' + e.message);
+        return null;
+      }
+    }
+
+    function renderOnce(){
+      const W = parseInt(wIn.value,10)||600;
+      const H = parseInt(hIn.value,10)||600;
+      canvas.width = W; canvas.height = H;
+      const img = ctx.createImageData(W,H);
+
+      const expr = formulaInput.value;
+      const seed = parseInt(seedIn.value,10)||0;
+      const rng = makeRNG(seed);
+      const factory = makeEvaluator(expr);
+      if(!factory){ setStatus('Failed to build evaluator.'); return; }
+      const evalFn = factory(rng, Math);
+
+      const now = (performance.now()-startTime)/1000;
+
+      setStatus('Rendering...');
+
+      // Loop pixels — you can reduce sampling for speed
+      let idx = 0;
+      for(let j=0;j<H;j++){
+        for(let i=0;i<W;i++){
+          // Normalize coordinates to -1..1 (or 0..1 if you prefer)
+          const x = (i/(W-1))*2 - 1;
+          const y = (j/(H-1))*2 - 1;
+          const sampleIndex = j*W + i;
+
+          // Call evaluator
+          let v = evalFn(x,y,sampleIndex,now);
+
+          // Interpret result
+          let r=0,g=0,b=0,a=255;
+          if(Array.isArray(v)){
+            // [r,g,b] expected in 0..1 or 0..255
+            r = Math.round(normTo255(v[0]));
+            g = Math.round(normTo255(v[1]));
+            b = Math.round(normTo255(v[2]));
+          } else {
+            // numeric: produce grayscale
+            const n = normTo255(v);
+            r=g=b=Math.round(n);
+          }
+
+          img.data[idx++] = r;
+          img.data[idx++] = g;
+          img.data[idx++] = b;
+          img.data[idx++] = a;
+        }
+      }
+
+      ctx.putImageData(img,0,0);
+      setStatus('Rendered ' + W + '×' + H + ' px');
+    }
+
+    function normTo255(v){
+      // If value is NaN or undefined -> 0
+      if(v == null || Number.isNaN(v)) return 0;
+      // If between 0 and 1 -> scale
+      if(typeof v === 'number'){
+        if(Math.abs(v) <= 1) return (v*255);
+        // If larger range 0..255
+        if(v > 1 && v <= 255) return v;
+        // For negative or larger values, map via tanh
+        return (0.5*(Math.tanh(v)+1))*255;
+      }
+      return 0;
+    }
+
+    // Animation loop — updates t and re-renders at requestAnimationFrame
+    function startAnimation(){
+      if(animId) return;
+      startTime = performance.now();
+      document.getElementById('animate').textContent = 'Animating...';
+      document.getElementById('animate').disabled = true;
+      document.getElementById('stop').disabled = false;
+
+      function frame(){
+        renderOnce();
+        animId = requestAnimationFrame(frame);
+      }
+      animId = requestAnimationFrame(frame);
+    }
+    function stopAnimation(){
+      if(animId){ cancelAnimationFrame(animId); animId = null; }
+      document.getElementById('animate').textContent = 'Start animation';
+      document.getElementById('animate').disabled = false;
+      document.getElementById('stop').disabled = true;
+      setStatus('Stopped');
+    }
+
+    // Download
+    function downloadPNG(){
+      canvas.toBlob(function(blob){
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'formula-art.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+    }
+
+    // Wire UI
+    document.getElementById('render').addEventListener('click', ()=>{
+      stopAnimation();
+      renderOnce();
+    });
+    document.getElementById('download').addEventListener('click', ()=> downloadPNG());
+    document.getElementById('animate').addEventListener('click', ()=> startAnimation());
+    document.getElementById('stop').addEventListener('click', ()=> stopAnimation());
+
+    // Render on load
+    renderOnce();
+  </script>
+</body>
+</html>
