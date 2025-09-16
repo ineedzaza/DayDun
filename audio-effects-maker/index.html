@@ -1,0 +1,2737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basic Ahh Site</title>
+<style>
+#tt {
+color: #ff0000;
+font-size: 12px;
+}
+body {
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 20px;
+transition: background-color 0.3s, color 0.3s;
+}
+body.dark-mode {
+background-color: #1a1a1a;
+color: #f0f0f0;
+}
+body.light-mode {
+background-color: #f0f0f0;
+color: #1a1a1a;
+}
+.container {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+}
+.panel {
+border-radius: 10px;
+padding: 20px;
+transition: background-color 0.3s;
+}
+body.dark-mode .panel {
+background-color: #2a2a2a;
+}
+body.light-mode .panel {
+background-color: #ffffff;
+box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.controls {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+button, select {
+background-color: #0000ff;
+color: white;
+border: none;
+padding: 10px;
+border-radius: 5px;
+cursor: pointer;
+}
+.slider-container {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.slider-wrapper {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+input[type="range"] {
+flex-grow: 1;
+}
+input[type="number"] {
+width: 60px;
+}
+#visualizer {
+width: 100%;
+height: 200px;
+background-color: #000;
+border-radius: 10px;
+}
+#customCodeInput {
+width: 100%;
+height: 100px;
+border-radius: 5px;
+transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+body.dark-mode #customCodeInput {
+background-color: #2a2a2a;
+color: #f0f0f0;
+border: 1px solid #444;
+}
+body.light-mode #customCodeInput {
+background-color: #ffffff;
+color: #1a1a1a;
+border: 1px solid #ccc;
+}
+@media (max-width: 768px) {
+.container {
+grid-template-columns: 1fr;
+}
+.panel {
+padding: 10px;
+}
+.controls {
+gap: 5px;
+}
+button, select {
+padding: 8px;
+font-size: 14px;
+}
+#visualizer {
+height: 150px;
+order: -1;
+}
+#customCodeInput {
+height: 80px;
+}
+}
+#crashHandler {
+background-color: #ff0000;
+padding: 10px;
+border-radius: 5px;
+display: none;
+}
+body.dark-mode #crashHandler {
+background-color: #800000;
+color: #f0f0f0;
+}
+body.light-mode #crashHandler {
+background-color: #ff0000;
+color: #ffffff;
+}
+
+.switch {
+position: relative;
+display: inline-block;
+width: 60px;
+height: 34px;
+}
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #ccc;
+transition: .4s;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 26px;
+width: 26px;
+left: 4px;
+bottom: 4px;
+background-color: white;
+transition: .4s;
+}
+input:checked + .slider {
+background-color: #2196F3;
+}
+input:focus + .slider {
+box-shadow: 0 0 1px #2196F3;
+}
+input:checked + .slider:before {
+transform: translateX(26px);
+}
+.slider.round {
+border-radius: 34px;
+}
+.slider.round:before {
+border-radius: 50%;
+}
+
+.video-wrapper {
+display: none;
+}
+
+#videoPlayer {
+display: none;
+}
+</style>
+</head>
+<body>
+<body class="dark-mode">
+<div class="container">
+<div class="panel">
+<h1>Basic Ahh site</h1>
+<div id="tt">This is buggy ass hell, Please tell me (D3nschøt) when something goes wrong</div>
+<br></br>
+<input type="file" id="audioFile" accept="audio/*,video/*">
+<div class="video-wrapper">
+<video id="videoPlayer" controls></video>
+</div>
+<div id="audioControls" class="controls">
+<button id="playPause">Play/Pause</button>
+<div id="audioWarning" style="color: #ff5000; display: none;">You need an audio file</div>
+<span id="durationCounter"></span>
+<button id="visualiserType">Visualiser: Frequency Log</button>
+<button id="saveAudio">Save audio effect</button>
+<div>
+<div>
+    <label for="saveOffset">Save Offset (seconds):</label> <!--recomended-->
+    <input type="range" id="saveOffset" min="0" max="5" step="0.1" value="0">
+    <input type="number" id="saveOffsetInput" min="0" max="5" step="0.1" value="0">
+</div>
+</div>
+</div>
+<div id="filterControls" class="controls">
+<h2>Effect Controls</h2>
+<select id="filterType">
+<option value="lowpass">Low Pass</option>
+<option value="highpass">High Pass</option>
+<option value="bandpass">Band Pass</option>
+<option value="notch">Notch</option>
+<option value="moog">Moog</option>
+<option value="RC">RC Filter</option>
+<option value="Distortion">Distortion</option>
+<option value="flanger">Flanger</option>
+<option value="convolver">Convolver</option>
+<option value="bitcrusher">Bitcrusher</option>
+<option value="ringmod">Ring Modulation</option>
+<option value="vibrato">Vibrato</option>
+<option value="pitch">Pitch</option>
+<option Value="nonlinearFilter">Non-Linear filters</option>
+<option value="phaser">phaser</option>
+<option value="custom">Custom</option>
+</select>
+<div id="ringmodControls" style="display: none;">
+<div class="slider-container">
+<label for="ringmodFrequencySlider">Frequency:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="ringmodFrequencySlider" min="1" max="20000" step="1" value="440">
+<input type="number" id="ringmodFrequencyInput" min="1" max="20000" step="1" value="440">
+<span id="ringmodFrequencyValue">Hz</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="ringmodDepthSlider">Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="ringmodDepthSlider" min="0" max="1" step="0.01" value="1">
+<input type="number" id="ringmodDepthInput" min="0" max="1" step="0.01" value="1">
+<span id="ringmodDepthValue"></span>
+</div>
+</div>
+<div class="slider-container">
+<label for="ringmodWaveType">Wave Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<select id="ringmodWaveType">
+<option value="sine">Sine</option>
+<option value="square">Square</option>
+<option value="sawtooth">Sawtooth</option>
+<option value="triangle">Triangle</option>
+<option value="custom">Custom</option>
+</select>
+<textarea id="RingModcustomWaveform" placeholder="Enter custom waveform here (e.g., 'x * Math.sin(2 * Math.PI * x)')"></textarea>
+</div>
+</div>
+</div>
+<div id="standardFilterControls">
+<div class="slider-container">
+<label for="frequencySlider">Frequency:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="frequencySlider" min="1" max="20000" value="1000">
+<input type="number" id="frequencyInput" min="1" max="20000" value="1000">
+<span id="frequencyValue">Hz</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="resonanceSlider">Resonance:&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="resonanceSlider" min="0" max="100" value="1">
+<input type="number" id="resonanceInput" min="0" max="100" value="1">
+<span id="resonanceValue"></span>
+</div>
+</div>
+</div>
+<div id="distortionControls" style="display: none;">
+<div class="slider-container">
+<label for="distortionSlider">Distortion:&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="distortionSlider" min="0" max="1000" value="50">
+<input type="number" id="distortionInput" min="0" max="1000" value="50">
+<span id="distortionValue"></span>
+</div>
+</div>
+</div>
+<div id="flangerControls" style="display: none;">
+<div class="slider-container">
+<label for="flangerDelaySlider">Flanger Delay:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="flangerDelaySlider" min="0.0001" max="0.1" step="0.0001" value="0.005">
+<input type="number" id="flangerDelayInput" min="0.0001" max="0.1" step="0.0001" value="0.005">
+<span id="flangerDelayValue">s</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="flangerDepthSlider">Flanger Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="flangerDepthSlider" min="0" max="1" step="0.0001" value="0.5">
+<input type="number" id="flangerDepthInput" min="0" max="1" step="0.0001" value="0.5">
+<span id="flangerDepthValue"></span>
+</div>
+</div>
+<div class="slider-container">
+<label for="flangerFeesdbackSlider">Flanger Feedback:</label>
+<div class="slider-wrapper">
+<input type="range" id="flangerFeedbackSlider" min="0" max="1" step="0.01" value="0.5">
+<input type="number" id="flangerFeedbackInput" min="0" max="1" step="0.01" value="0.5">
+<span id="flangerFeedbackValue"></span>
+</div>
+</div>
+<div class="slider-container">
+<label for="flangerRateSlider">Flanger Rate:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="flangerRateSlider" min="0" max="20" step="0.001" value="0.5000">
+<input type="number" id="flangerRateInput" min="0" max="20" step="0.001" value="0.5000">
+<span id="flangerRateValue">Hz</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="flangerWaveType">Wave Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<select id="flangerWaveType">
+<option value="sine">Sine</option>
+<option value="square">Square</option>
+<option value="sawtooth">Sawtooth</option>
+<option value="triangle">Triangle</option>
+<option value="custom">Custom</option>
+</select>
+<textarea id="FlangercustomWaveform" placeholder="Enter custom waveform here (e.g., 'x * Math.sin(2 * Math.PI * x)')"></textarea>
+</div>
+</div>
+<div class="slider-container">
+<label for="flangerInvert">Invert Flanger:</label>
+<div class="slider-wrapper">
+<input type="checkbox" id="flangerInvert">
+</div>
+</div>
+</div>
+<div id="convolverControls" style="display: none;">
+<div class="slider-container">
+<label for="convolverDurationSlider">Duration:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="convolverDurationSlider" min="0.1" max="10" step="0.1" value="1">
+<input type="number" id="convolverDurationInput" min="0.1" max="10" step="0.1" value="1">
+<span id="convolverDurationValue">s</span>
+</div>
+</div>
+</div>
+<div id="moogControls" style="display: none;">
+<div class="slider-container">
+<label for="moogCutoffSlider">Cutoff:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="moogCutoffSlider" min="0" max="1" step="0.001" value="0.065">
+<input type="number" id="moogCutoffInput" min="0" max="1" step="0.001" value="0.065">
+<span id="moogCutoffValue"></span>
+</div>
+</div>
+<div class="slider-container">
+<label for="moogResonanceSlider">Resonance:&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="moogResonanceSlider" min="0" max="4" step="0.01" value="3.99">
+<input type="number" id="moogResonanceInput" min="0" max="4" step="0.01" value="3.99">
+<span id="moogResonanceValue"></span>
+</div>
+</div>
+</div>
+<div id="bitcrusherControls" style="display: none;">
+<div class="slider-container">
+<label for="bitcrusherBitsSlider">Bits:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="bitcrusherBitsSlider" min="1" max="16" step="1" value="4">
+<input type="number" id="bitcrusherBitsInput" min="1" max="16" step="1" value="4">
+<span id="bitcrusherBitsValue"></span>
+</div>
+</div>
+<div class="slider-container">
+<label for="bitcrusherNormfreqSlider">Norm Freq:&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="bitcrusherNormfreqSlider" min="0" max="1" step="0.01" value="0.1">
+<input type="number" id="bitcrusherNormfreqInput" min="0" max="1" step="0.01" value="0.1">
+<span id="bitcrusherNormfreqValue"></span>
+</div>
+</div>
+</div>
+<div id="ringmodControls" style="display: none;">
+<div class="slider-container">
+<label for="ringmodFrequencySlider">Frequency:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="ringmodFrequencySlider" min="1" max="5000" step="1" value="440">
+<input type="number" id="ringmodFrequencyInput" min="1" max="5000" step="1" value="440">
+<span id="ringmodFrequencyValue">Hz</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="ringmodDepthSlider">Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="ringmodDepthSlider" min="0" max="1" step="0.01" value="1">
+<input type="number" id="ringmodDepthInput" min="0" max="1" step="0.01" value="1">
+<span id="ringmodDepthValue"></span>
+</div>
+</div>
+<div class="slider-container">
+<label for="ringmodWaveType">Wave Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+</div>
+</div>
+</div>
+<div id="vibratoControls" style="display: none;">
+<div class="slider-container">
+<label for="vibratoRateSlider">Vibrato Rate:&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="vibratoRateSlider" min="0.1" max="1000" step="0.1" value="5">
+<input type="number" id="vibratoRateInput" min="0.1" max="1000" step="0.1" value="5">
+<span id="vibratoRateValue">Hz</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="vibratoDepthSlider">Vibrato Depth:</label>
+<div class="slider-wrapper">
+<input type="range" id="vibratoDepthSlider" min="0" max="1200" step="1" value="300">
+<input type="number" id="vibratoDepthInput" min="0" max="1200" step="1" value="300">
+<span id="vibratoDepthValue">cents</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="vibratoWaveType">Wave Type:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<select id="vibratoWaveType">
+<option value="sine">Sine</option>
+<option value="square">Square</option>
+<option value="sawtooth">Sawtooth</option>
+<option value="triangle">Triangle</option>
+<option value="custom">Custom</option>
+</select>
+<textarea id="VibratocustomWaveform" placeholder="Enter custom waveform here (e.g., 'x * Math.sin(2 * Math.PI * x)')"></textarea>
+</div>
+</div>
+</div>
+<div id="pitchShiftControls" style="display: none;">
+<div class="slider-container">
+<label for="pitchShiftSlider">Pitch Shift:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="pitchShiftSlider" min="-24" max="24" step="0.1" value="0">
+<input type="number" id="pitchShiftInput" min="-24" max="24" step="0.1" value="0">
+<span id="pitchShiftValue">semitones</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="pitchShiftQualitySlider">Pitch Shift Quality:</label>
+<div class="slider-wrapper">
+<input type="range" id="pitchShiftQualitySlider" min="8" max="14" step="1" value="11">
+<input type="number" id="pitchShiftQualityInput" min="8" max="14" step="1" value="11">
+<span id="pitchShiftQualityValue">samples</span>
+</div>
+</div>
+</div>
+</div>
+<div class="nonlinFilters" style="display: none;">
+    <div class="control-group">
+        <label for="nonlinearFilterFrequencyValue">Frequency:</label>
+        <input type="range" id="nonlinearFilterFrequencyValue" min="0" max="1" step="0.001" value=".1">
+        <input type="number" id="nonlinearFilterFrequencyInput" min="0" max="1" step="0.001" value=".1">
+    </div>
+    <div class="control-group">
+        <label for="nonlinearFilterResonanceValue">Resonance:</label>
+        <input type="range" id="nonlinearFilterResonanceValue" min="0" max="1" step="0.001" value=".1">
+        <input type="number" id="nonlinearFilterResonanceInput" min="0" max="1" step="0.001" value=".1">
+    </div>
+    <div class="control-group">
+        <label for="nonlinearFilterType">Nonlinear Filter Type</label>
+        <select id="nonlinearFilterType">
+            <option value="1">Low-Pass</option>
+            <option value="2">High-Pass</option>
+            <option value="3">Band-Pass</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="nonlinearFilterMode">Filter Mode</label>
+        <select id="nonlinearFilterMode">
+            <option value="0">Standard (Sine-like)</option>
+            <option value="1">Clipped (Triangle-like)</option>
+            <option value="2">Positive Clipped (+Saw-like)</option>
+            <option value="3">Negative Clipped (-saw-like)</option>
+            <option value="4">Dual Filter (pulse-like)</option>
+        </select>
+    </div>
+</div>
+
+<div id="phaserControls" style="display: none;">
+<div class="control-group">
+<label for="phaserMinFrequencySlider">MinFrequency:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<input type="range" id="phaserMinFrequencySlider" min="0" max="1" step="0.001" value="0">
+<input type="number" id="phaserMinFrequencyInput" min="0" max="1" step="0.001" value="0">
+</div>
+
+<div class="control-group">
+<label for="phaserMaxFrequencySlider">MaxFrequency:&nbsp;&nbsp;&nbsp;</label>
+<input type="range" id="phaserMaxFrequencySlider" min="0" max="1" step="0.001" value="1">
+<input type="number" id="phaserMaxFrequencyInput" min="0" max="1" step="0.001" value="1">
+</div>
+
+<div class="control-group">
+<label for="phaserFeedbackSlider">Feedback:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<input type="range" id="phaserFeedbackSlider" min="0" max="1" step="0.001" value=".5">
+<input type="number" id="phaserFeedbackInput" min="0" max="1" step="0.001" value=".5">
+</div>
+
+<div class="control-group">
+<label for="phaserRateSlider">Rate:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<input type="range" id="phaserRateSlider" min="0" max="100" step="0.001" value=".1">
+<input type="number" id="phaserRateInput" min="0" max="100" step="0.001" value=".1">
+</div>
+
+<div class="control-group">
+    <label for="PhaserBands">Phaser bands:</label>
+    <input type="number" id="PhaserBands" min="0" step="1" value="3">
+</div>
+
+<div class="control-group">
+    <label for="PhaserWetSlider">Phaser Wet/Dry:</label>
+    <input type="range" id="PhaserWetSlider" min="-1" max="1" step="0.001" value=".5">
+    <input type="number" id="PhaserWetInput" min="-1" max="1" step="0.001" value=".5">
+</div>
+
+<div class="control-group">
+    <label for="PhaserWaveType">Wave Type:</label>
+    <select id="PhaserWaveType">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+        <option value="custom">Custom</option>
+    </select>
+    <textarea id="PhasercustomWaveform" placeholder="Enter custom waveform here (e.g., 'x * Math.sin(2 * Math.PI * x)')"></textarea>
+</div>
+
+</div>
+<div class="slider-container">
+<label for="volumeSlider">Volume:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="range" id="volumeSlider" min="0" max="2" step="0.01" value="1">
+<input type="number" id="volumeInput" min="0" max="2" step="0.01" value="1">
+<span id="volumeValue">%</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="limiterToggle">Limiter:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="checkbox" id="limiterToggle" checked>
+</div>
+</div>
+<div class="slider-container">
+<label for="limiterThresholdSlider">Limiter Threshold:</label>
+<div class="slider-wrapper">
+<input type="range" id="limiterThresholdSlider" min="-60" max="0" step="0.1" value="-0.5">
+<input type="number" id="limiterThresholdInput" min="-60" max="0" step="0.1" value="-0.5">
+<span id="limiterThresholdValue">dB</span>
+</div>
+</div>
+<div class="slider-container">
+<label for="dcRemovalToggle">DC Removal:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+<div class="slider-wrapper">
+<input type="checkbox" id="dcRemovalToggle">
+</div>
+</div>
+<div id="crashHandler"></div>
+<div class="settings-panel">
+<h2>Settings</h2>
+<div id="darkModeToggle">
+<label class="switch">
+<input type="checkbox" id="darkModeSwitch" checked>
+<span class="slider round"></span>
+</label>
+<span id="modeLabel">Dark Mode</span>
+</div>
+</div>
+</div>
+<div class="panel">
+<canvas id="visualizer"></canvas>
+<h2>JS Audio Processing:</h2>
+<textarea id="customCodeInput" placeholder="Enter custom JS code here. Use 'x' as the input sample variable. if you wanna use Math.JS you can use 'm' for short" spellcheck="false"></textarea>
+<div id="errorContainer" style="color: #00ff00;">Status: OK</div>
+</div>
+</div>
+<script>
+    function saveStateToURL() {
+        const params = new URLSearchParams();
+
+        // Collect all slider, input, and select values
+        document.querySelectorAll('input[type="range"], input[type="number"], select').forEach(input => {
+            params.set(input.id, input.value);
+        });
+
+        // Encode all textarea content as Base64
+        document.querySelectorAll('textarea').forEach(textarea => {
+            const base64Content = btoa(textarea.value);
+            params.set(textarea.id, base64Content);
+        });
+
+        // Update the URL without reloading the page
+        const newUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    function loadStateFromURL() {
+        const params = new URLSearchParams(window.location.search);
+
+        // Ensure audioContext and gainNode are initialized
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (!gainNode) {
+            gainNode = audioContext.createGain();
+            gainNode.connect(audioContext.destination);
+        }
+
+        // Restore all slider, input, select, and textarea values
+        params.forEach((value, key) => {
+            const input = document.getElementById(key);
+            if (input) {
+                if (input.tagName === 'TEXTAREA') {
+                    input.value = atob(value); // Decode Base64 for textareas
+                } else {
+                    input.value = value;
+                }
+                input.dispatchEvent(new Event('input'));
+            }
+        });
+
+        // Handle filterType specifically
+        const filterType = params.get('filterType');
+        if (filterType) {
+            const filterTypeSelect = document.getElementById('filterType');
+            filterTypeSelect.value = filterType;
+            filterTypeSelect.dispatchEvent(new Event('change')); // Trigger the change event to update the UI
+        }
+
+        // Update the gainNode's gain value if the volume slider is present
+        const volumeSlider = document.getElementById('volumeSlider');
+        if (volumeSlider) {
+            const volume = parseFloat(volumeSlider.value);
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Attach event listeners to all sliders, inputs, selects, and textareas
+        document.querySelectorAll('input[type="range"], input[type="number"], select, textarea').forEach(input => {
+            input.addEventListener('input', saveStateToURL);
+            input.addEventListener('change', saveStateToURL);
+        });
+
+        // Load state from URL on page load
+        loadStateFromURL();
+    });
+</script>
+
+<script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            if (message.includes("Cannot read properties of undefined (reading 'start')")) {
+                return true; // Suppress this specific error cus I'm lazy
+            }
+            const crashHandler = document.getElementById('crashHandler');
+            crashHandler.style.display = 'block';
+            crashHandler.innerHTML = `
+                <h3>Oops! Something went wrong.</h3>
+                <p>Error: ${message}</p>
+                <p>Line: ${lineno}</p>
+                <p>Column: ${colno}</p>
+                <p>Please refresh the page and try again. If the problem persists, contact D3nschøt (the developer).</p>
+            `;
+            return true;
+        }; // AI created this cus I'm too lazy to add a crash handler LMAO
+
+        const darkModeSwitch = document.getElementById('darkModeSwitch');
+        const body = document.body;
+        const modeLabel = document.getElementById('modeLabel');
+
+        darkModeSwitch.addEventListener('change', () => {
+            if (darkModeSwitch.checked) {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                modeLabel.textContent = 'Dark Mode';
+            } else {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                modeLabel.textContent = 'Light Mode';
+            }
+        });
+
+        let audioContext;
+        let audioBuffer;
+        let source;
+        let filter;
+        let gainNode;
+        let limiter;
+        let analyser;
+        let isPlaying = false;
+        let visualiserMode = 'frequency-log';
+        let startTime;
+        let durationInterval;
+        let flangerDelay;
+        let flangerLFO;
+        let flangerGain;
+        let flangerFeedback;
+        let dcRemovalFilter;
+        let vibrato;
+        let vibratoGain;
+
+        const {
+            abs, acos, acosh, asin, asinh, atan, atan2, atanh, cbrt, ceil, clz32, cos, cosh, exp, expm1, floor, fround, hypot, imul, log, log10, log1p, log2, max, min, pow, random, round, sign, sin, sinh, sqrt, tan, tanh, trunc
+        } = Math
+
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        const durationCounter = document.getElementById('durationCounter');
+        const filterTypeSelect = document.getElementById('filterType');
+        const warningContainer = document.createElement('div');
+        warningContainer.id = 'warningContainer';
+        warningContainer.style.display = 'none';
+        document.body.appendChild(warningContainer);
+        m = Math
+
+        document.getElementById('audioFile').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file.type.startsWith('video/')) {
+                try {
+                    const audioBlob = await convertVideoToAudio(file);
+                    handleAudioFile(audioBlob);
+                } catch (error) {
+                    console.error('Error converting video to audio:', error);
+                    alert('Error converting video to audio. Please try a different file.');
+                }
+            } else {
+                handleAudioFile(file);
+            }
+        });
+        // Detect mobile device again lazy to emplement certain things
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        if (isMobile()) {
+            document.body.classList.add('mobile');
+        }
+
+        document.getElementById('filterType').addEventListener('change', (event) => {
+            if (isPlaying) {
+                source.stop();
+                isPlaying = false;
+                clearInterval(durationInterval);
+            }
+            const filterType = event.target.value;
+            const standardFilterControls = document.getElementById('standardFilterControls');
+            const flangerControls = document.getElementById('flangerControls');
+            const distortionControls = document.getElementById('distortionControls');
+            const convolverControls = document.getElementById('convolverControls');
+            const moogControls = document.getElementById('moogControls');
+            const bitcrusherControls = document.getElementById('bitcrusherControls');
+            const ringmodControls = document.getElementById('ringmodControls');
+            const vibratoControls = document.getElementById('vibratoControls');
+            const pitchShiftControls = document.getElementById('pitchShiftControls');
+            const nonlinearFilter = document.querySelector('.nonlinFilters');
+            const phaserControls = document.getElementById('phaserControls');
+
+            standardFilterControls.style.display = 'none';
+            flangerControls.style.display = 'none';
+            distortionControls.style.display = 'none';
+            convolverControls.style.display = 'none';
+            moogControls.style.display = 'none';
+            bitcrusherControls.style.display = 'none';
+            ringmodControls.style.display = 'none';
+            vibratoControls.style.display = 'none';
+            pitchShiftControls.style.display = 'none';
+            nonlinearFilter.style.display = 'none';
+            phaserControls.style.display = 'none';
+
+            switch (filterType) {
+                case 'flanger':
+                    flangerControls.style.display = 'block';
+                    break;
+                case 'Distortion':
+                    distortionControls.style.display = 'block';
+                    break;
+                case 'convolver':
+                    convolverControls.style.display = 'block';
+                    break;
+                case 'moog':
+                    moogControls.style.display = 'block';
+                    break;
+                case 'bitcrusher':
+                    bitcrusherControls.style.display = 'block';
+                    break;
+                case 'ringmod':
+                    ringmodControls.style.display = 'block';
+                    break;
+                case 'vibrato':
+                    vibratoControls.style.display = 'block';
+                    break;
+                case 'pitch':
+                    pitchShiftControls.style.display = 'block';
+                    break;
+                case 'nonlinearFilter':
+                    nonlinearFilter.style.display = 'block';
+                    break;
+                case 'phaser':
+                    phaserControls.style.display = 'block';
+                    break
+                default:
+                    standardFilterControls.style.display = 'block';
+            }
+            setupAudioGraph();
+        });
+
+        canvas.width = canvas.clientWidth * window.devicePixelRatio;
+        canvas.height = canvas.clientHeight * window.devicePixelRatio;
+        canvasCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        async function convertVideoToAudio(file) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            const offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
+            const source = offlineContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(offlineContext.destination);
+            source.start();
+
+            const renderedBuffer = await offlineContext.startRendering();
+            return bufferToWave(renderedBuffer, renderedBuffer.length);
+        }
+
+        async function handleAudioFile(file) {
+            if (isPlaying) {
+                source.stop();
+                isPlaying = false;
+                clearInterval(durationInterval);
+            }
+
+            const arrayBuffer = await file.arrayBuffer();
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            setupAudioGraph();
+            updateDurationDisplay(0, audioBuffer.duration);
+            warningContainer.style.display = 'none';
+            document.getElementById('audioWarning').style.display = 'none';
+        }
+
+        function bufferToWave(abuffer, len) {
+            const numOfChan = abuffer.numberOfChannels;
+            const length = len * numOfChan * 2 + 44;
+            const buffer = new ArrayBuffer(length);
+            const view = new DataView(buffer);
+            const channels = [];
+            let i;
+            let sample;
+            let offset = 0;
+            let pos = 0;
+
+            function setUint16(data) {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            }
+
+            function setUint32(data) {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            }
+
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8); // file length - 8
+            setUint32(0x45564157); // "WAVE"
+
+            setUint32(0x20746d66); // "fmt " chunk
+            setUint32(16); // length = 16
+            setUint16(1); // PCM (uncompressed)
+            setUint16(numOfChan);
+            setUint32(abuffer.sampleRate);
+            setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
+            setUint16(numOfChan * 2); // block-align
+            setUint16(16); // 16-bit
+
+            setUint32(0x61746164); // "data" - chunk
+            setUint32(length - pos - 4); // chunk length
+
+            for (i = 0; i < abuffer.numberOfChannels; i++)
+                channels.push(abuffer.getChannelData(i));
+
+            while (pos < length) {
+                for (i = 0; i < numOfChan; i++) { // interleave channels
+                    sample = Math.max(-1, Math.min(1, channels[i][offset])); // clamp
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; // scale to 16-bit signed int
+                    view.setInt16(pos, sample, true); // write 16-bit sample
+                    pos += 2;
+                }
+                offset++; // next source sample
+            }
+
+            return new Blob([buffer], { type: "audio/wav" });
+        }
+
+        filterTypeSelect.addEventListener('change', (event) => {
+            setupAudioGraph();
+        });   
+
+        function setupAudioGraph() {
+            if (!audioBuffer) {
+            warningContainer.style.display = 'block';
+            return;
+            }
+
+            if (source) {
+            source.disconnect();
+            }
+            source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.loop = true;
+
+            const filterType = document.getElementById('filterType').value;
+
+            switch (filterType) {
+            case 'custom':
+                filter = audioContext.createWaveShaper();
+                filter.curve = custom();
+                break;
+            case 'Distortion':
+                filter = audioContext.createWaveShaper();
+                filter.curve = customx();
+                break;
+            case 'flanger':
+                const flangerBufferSize = 4096 * 2;
+                    filter = audioContext.createScriptProcessor(flangerBufferSize, 2, 2);
+                    let delayBufferLeft = new Float32Array(flangerBufferSize).fill(0);
+                    let delayBufferRight = new Float32Array(flangerBufferSize).fill(0);
+                    let delayWritePosition = 0;
+                    let lfoPhase = 0;
+                    let LFOtime = 0;
+
+                    filter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const delayTime = parseFloat(document.getElementById('flangerDelaySlider').value);
+                        const depth = parseFloat(document.getElementById('flangerDepthSlider').value);
+                        const feedback = parseFloat(document.getElementById('flangerFeedbackSlider').value);
+                        const rate = parseFloat(document.getElementById('flangerRateSlider').value);
+                        const waveType = document.getElementById('flangerWaveType').value;
+                        const invertFlanger = document.getElementById('flangerInvert').checked;
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            let lfoValue;
+                            switch (waveType) {
+                                case 'sine':
+                                    lfoValue = Math.sin(lfoPhase);
+                                    break;
+                                case 'square':
+                                    lfoValue = lfoPhase < Math.PI ? 1 : -1;
+                                    break;
+                                case 'sawtooth':
+                                    lfoValue = (lfoPhase / (2 * Math.PI)) * 2 - 1;
+                                    break;
+                                case 'triangle':
+                                    lfoValue = Math.asin(Math.sin(lfoPhase)) / Math.PI * 2;
+                                    break;
+                                case 'custom':
+                                    const customWaveform = document.getElementById('FlangercustomWaveform').value;
+                                    try {
+                                        const compiled = new Function('x', `return ${customWaveform || 'Math.sin(x)'}`);
+                                        lfoValue = compiled(lfoPhase / (2 * Math.PI)) || Math.sin(lfoPhase);
+                                    } catch (error) {
+                                        lfoValue = 0.5; // Fallback to zero if there's an error
+                                    }
+                                    break;
+                                default:
+                                    lfoValue = Math.sin(lfoPhase);
+                            }
+
+                            const delayTimeSamples = Math.max(
+                                0,
+                                Math.min(
+                                    (delayTime + lfoValue * depth * delayTime) * audioContext.sampleRate,
+                                    flangerBufferSize - 1
+                                )
+                            );
+
+                            let delayReadPosition = delayWritePosition - delayTimeSamples;
+                            if (delayReadPosition < 0) delayReadPosition += flangerBufferSize;
+
+                            const readPosition = Math.floor(delayReadPosition);
+                            const fraction = delayReadPosition - readPosition;
+
+                            const delayedSampleL =
+                                (1 - fraction) * delayBufferLeft[readPosition % flangerBufferSize] +
+                                fraction * delayBufferLeft[(readPosition + 1) % flangerBufferSize];
+                            const delayedSampleR =
+                                (1 - fraction) * delayBufferRight[readPosition % flangerBufferSize] +
+                                fraction * delayBufferRight[(readPosition + 1) % flangerBufferSize];
+
+                            if (invertFlanger) {
+                                outputL[i] = inputL[i] - delayedSampleL * feedback;
+                                outputR[i] = inputR[i] - delayedSampleR * feedback;
+                            } else {
+                                outputL[i] = inputL[i] + delayedSampleL * feedback;
+                                outputR[i] = inputR[i] + delayedSampleR * feedback;
+                            }
+
+                            delayBufferLeft[delayWritePosition] = inputL[i] + outputL[i] * feedback;
+                            delayBufferRight[delayWritePosition] = inputR[i] + outputR[i] * feedback;
+
+                            delayWritePosition = (delayWritePosition + 1) % flangerBufferSize;
+                            lfoPhase += (2 * Math.PI * rate) / audioContext.sampleRate;
+
+                            LFOtime += 1 / audioContext.sampleRate;
+                            if (lfoPhase > 2 * Math.PI) lfoPhase -= 2 * Math.PI;
+                            if (LFOtime > audioBuffer.duration) {
+                                lfoPhase = 0;
+                                LFOtime = 0;
+                            }
+                        }
+                    };
+                    break;
+                case 'convolver':
+                    filter = audioContext.createConvolver();
+                    const convolverDuration = parseFloat(document.getElementById('convolverDurationSlider').value);
+                    const noiseBuffer = audioContext.createBuffer(2, convolverDuration * audioContext.sampleRate, audioContext.sampleRate);
+                    const left = noiseBuffer.getChannelData(0);
+                    const right = noiseBuffer.getChannelData(1);
+                    for (let i = 0; i < noiseBuffer.length; i++) {
+                        left[i] = m.random() * 2 - 1;
+                        right[i] = m.random() * 2 - 1;
+                    }
+                    filter.buffer = noiseBuffer;
+                    break;
+                case 'moog':
+                    const moogBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(moogBufferSize, 2, 2);
+                    let in1L, in2L, in3L, in4L, out1L, out2L, out3L, out4L;
+                    let in1R, in2R, in3R, in4R, out1R, out2R, out3R, out4R;
+                    in1L = in2L = in3L = in4L = out1L = out2L = out3L = out4L = 0.0;
+                    in1R = in2R = in3R = in4R = out1R = out2R = out3R = out4R = 0.0;
+                    filter.onaudioprocess = function(e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const cutoff = parseFloat(document.getElementById('moogCutoffSlider').value);
+                        const resonance = parseFloat(document.getElementById('moogResonanceSlider').value);
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            const inputSampleL = inputL[i];
+                            const inputSampleR = inputR[i];
+                            const f = cutoff * 1.16;
+                            const fb = resonance * (1.0 - 0.15 * f * f);
+
+                            let inputMinusL = inputSampleL - out4L * fb;
+                            inputMinusL *= 0.35013 * (f * f) * (f * f);
+                            out1L = inputMinusL + 0.3 * in1L + (1 - f) * out1L;
+                            in1L = inputMinusL;
+                            out2L = out1L + 0.3 * in2L + (1 - f) * out2L;
+                            in2L = out1L;
+                            out3L = out2L + 0.3 * in3L + (1 - f) * out3L;
+                            in3L = out2L;
+                            out4L = out3L + 0.3 * in4L + (1 - f) * out4L;
+                            in4L = out3L;
+                            outputL[i] = out4L;
+
+                            let inputMinusR = inputSampleR - out4R * fb;
+                            inputMinusR *= 0.35013 * (f * f) * (f * f);
+                            out1R = inputMinusR + 0.3 * in1R + (1 - f) * out1R;
+                            in1R = inputMinusR;
+                            out2R = out1R + 0.3 * in2R + (1 - f) * out2R;
+                            in2R = out1R;
+                            out3R = out2R + 0.3 * in3R + (1 - f) * out3R;
+                            in3R = out2R;
+                            out4R = out3R + 0.3 * in4R + (1 - f) * out4R;
+                            in4R = out3R;
+                            outputR[i] = out4R;
+                        }
+                    };
+                    break;
+                case 'bitcrusher':
+                    const bitcrusherBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(bitcrusherBufferSize, 2, 2);
+                    let phaserL = 0, phaserR = 0;
+                    let lastL = 0, lastR = 0;
+                    filter.onaudioprocess = function(e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const bits = parseInt(document.getElementById('bitcrusherBitsSlider').value);
+                        const normfreq = parseFloat(document.getElementById('bitcrusherNormfreqSlider').value);
+                        const step = m.pow(1/2, bits);
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            phaserL += normfreq;
+                            phaserR += normfreq;
+                            if (phaserL >= 1.0) {
+                                phaserL -= 1.0;
+                                lastL = step * m.floor(inputL[i] / step + 0.5);
+                            }
+                            if (phaserR >= 1.0) {
+                                phaserR -= 1.0;
+                                lastR = step * m.floor(inputR[i] / step + 0.5);
+                            }
+                            outputL[i] = lastL;
+                            outputR[i] = lastR;
+                        }
+                    };
+                    break;
+                case 'RC':
+                    const RCBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(RCBufferSize, 2, 2);
+                    let lastOutputL = 0, lastOutputR = 0;
+                    filter.onaudioprocess = function(e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        
+                        const dt = 1 / audioContext.sampleRate;
+                        const RC = 1 / (2 * Math.PI * (m.pow(parseFloat(document.getElementById('frequencySlider').value)/20000,2)*20000));
+                        const alpha = dt / (RC + dt);
+                        
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            outputL[i] = alpha * inputL[i] + (1 - alpha) * lastOutputL;
+                            lastOutputL = outputL[i];
+
+                            outputR[i] = alpha * inputR[i] + (1 - alpha) * lastOutputR;
+                            lastOutputR = outputR[i];
+                        }
+                    };
+                    break;
+                case 'ringmod':
+                    const ringmodBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(ringmodBufferSize, 2, 2);
+                    filter.onaudioprocess = function(e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const frequency = parseFloat(document.getElementById('ringmodFrequencySlider').value);
+                        const depth = parseFloat(document.getElementById('ringmodDepthSlider').value);
+                        const waveType = document.getElementById('ringmodWaveType').value;
+                        
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            const t = i / audioContext.sampleRate;
+                            let modulator;
+                            switch (waveType) {
+                                case 'sine':
+                                    modulator = Math.sin(2 * Math.PI * frequency * t);
+                                    break;
+                                case 'square':
+                                    modulator = Math.sign(Math.sin(2 * Math.PI * frequency * t));
+                                    break;
+                                case 'sawtooth':
+                                    modulator = 2 * (frequency * t - Math.floor(frequency * t + 0.5));
+                                    break;
+                                case 'triangle':
+                                    modulator = Math.abs(2 * (frequency * t - Math.floor(frequency * t + 0.5))) * 2 - 1;
+                                    break;
+                                case 'custom':
+                                    const customWaveform = document.getElementById('RingmodCustomWaveform').value;
+                                    try {
+                                        modulator = eval(customWaveform.replace(/x/g, (t * frequency * 2 * Math.PI)));
+                                    } catch (error) {
+                                        console.error('Error evaluating custom waveform:', error);
+                                        modulator = 0; // Fallback to zero if there's an error
+                                    }
+                                    break;
+                            }
+                            
+                            const ringmod = 1 - depth + depth * modulator;
+                            
+                            outputL[i] = inputL[i] * ringmod;
+                            outputR[i] = inputR[i] * ringmod;
+                        }
+                    };
+                    break;
+                case 'vibrato':
+                    const vibratoBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(vibratoBufferSize, 2, 2);
+                    let vibratoPhase = 0;
+
+                    filter.onaudioprocess = function(e) {
+                        if (!isPlaying) return; // Add this line to prevent processing when not playing
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const frequency = parseFloat(document.getElementById('vibratoRateSlider').value);
+                        const depth = parseFloat(document.getElementById('vibratoDepthSlider').value) / 1200; // Adjusted depth scaling
+                        const waveType = document.getElementById('vibratoWaveType').value;
+                        
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            let lfo;
+                            switch (waveType) {
+                                case 'sine':
+                                    lfo = Math.sin(2 * Math.PI * frequency * vibratoPhase);
+                                    break;
+                                case 'square':
+                                    lfo = Math.sign(Math.sin(2 * Math.PI * frequency * vibratoPhase));
+                                    break;
+                                case 'sawtooth':
+                                    lfo = 2 * (frequency * vibratoPhase - Math.floor(frequency * vibratoPhase + 0.5));
+                                    break;
+                                case 'triangle':
+                                    lfo = Math.abs(2 * (frequency * vibratoPhase - Math.floor(frequency * vibratoPhase + 0.5))) * 2 - 1;
+                                    break;
+                                case 'custom':
+                                    const customWaveform = document.getElementById('VibratoCustomWaveform').value;
+                                    try {
+                                        lfo = eval(customWaveform.replace(/x/g, (vibratoPhase * frequency * 2 * Math.PI)));
+                                    } catch (error) {
+                                        console.error('Error evaluating custom waveform:', error);
+                                        lfo = 0; // Fallback to zero if there's an error
+                                    }
+                                    break;
+                                default:
+                                    lfo = 0;
+                                    break;
+                            }
+                            vibratoPhase += 1 / audioContext.sampleRate;
+                            if (vibratoPhase > 1) vibratoPhase -= 1;
+
+                            const speedFactor = Math.pow(2, lfo * depth);
+                            const playbackRate = 1 + (speedFactor - 1) * depth;
+
+                            outputL[i] = inputL[Math.floor(i / playbackRate) % inputL.length];
+                            outputR[i] = inputR[Math.floor(i / playbackRate) % inputR.length];
+                        }
+                    };
+                    break;
+                case 'pitch':
+                    const pitchQuality = Math.min(14, Math.max(8, parseFloat(document.getElementById('pitchShiftQualitySlider').value)));
+                    const pitchBufferSize = Math.pow(2, Math.floor(pitchQuality));
+                    filter = audioContext.createScriptProcessor(pitchBufferSize, 2, 2);
+                    let pitchBufferL = new Float32Array(pitchBufferSize);
+                    let pitchBufferR = new Float32Array(pitchBufferSize);
+                    let pitchBufferIndex = 0;
+
+                    
+
+                    filter.onaudioprocess = function(e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const pitchShift = parseFloat(document.getElementById('pitchShiftSlider').value);
+                        
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            // Calculate read position
+                            const readPos = pitchBufferIndex * Math.pow(2, pitchShift / 12);
+                            const wrappedReadPos = (readPos + pitchBufferSize) % pitchBufferSize;
+                            
+                            // Read from the circular buffer
+                            const readIndex = Math.floor(wrappedReadPos);
+                            const nextIndex = (readIndex + 1) % pitchBufferSize;
+                            const fraction = wrappedReadPos - readIndex;
+                            const firstL = pitchBufferL[readIndex];
+                            const secondL = pitchBufferL[nextIndex];
+                            const firstR = pitchBufferR[readIndex];
+                            const secondR = pitchBufferR[nextIndex];
+                            
+                            // Linear interpolation
+                            const interpolatedL = firstL + fraction * (secondL - firstL);
+                            const interpolatedR = firstR + fraction * (secondR - firstR);
+
+                            // Write to the circular buffer
+                            pitchBufferL[pitchBufferIndex] = inputL[i];
+                            pitchBufferR[pitchBufferIndex] = inputR[i];
+                            pitchBufferIndex = (pitchBufferIndex + 1) % pitchBufferSize;
+
+                            // Output
+                            outputL[i] = interpolatedL;
+                            outputR[i] = interpolatedR;
+                        }
+                    };
+                    break;
+                    case 'nonlinearFilter':
+                        function createNonlinearFilterProcessor() {
+                        const stateL = { pi: 0, p1: 0, p2: 0, p3: 0, p4: 0 };
+                        const stateR = { pi: 0, p1: 0, p2: 0, p3: 0, p4: 0 };
+
+                        function processChannel(input, output, cutoff, resonance, mode, state, filterType) {
+                            const fr = Math.min(Math.max(cutoff, 0), 0.99);
+                            for (let i = 0; i < input.length; i++) {
+                                const ff = input[i];
+                                let filterOut = ff;
+
+                                let f = ff;
+                                if (filterType == 3) {
+                                    state[call].pi += ff - state[call].pi * cutoff;
+                                    f = ff - state[call].pi;
+                                }
+
+                                switch (mode) {
+                                    case 0:
+                                        state[call].p1 += state[call].p2 += ((f - state[call].p1) * fr * fr - state[call].p2 * (1 - resonance));
+                                        filterOut = state[call].p1;
+                                        break;
+                                    case 1:
+                                        state[call].p1 += Math.max(Math.min(state[call].p2 += (f - state[call].p1 - state[call].p2 * (1 - resonance)), fr * fr), -fr * fr);
+                                        filterOut = state[call].p1;
+                                        break;
+                                    case 2:
+                                        state[call].p1 += Math.min(state[call].p2 += (f - state[call].p1 - state[call].p2 * (1 - resonance)), fr * fr);
+                                        filterOut = state[call].p1;
+                                        break;
+                                    case 3:
+                                        state[call].p1 += Math.max(state[call].p2 += (f - state[call].p1 - state[call].p2 * (1 - resonance)), -fr * fr);
+                                        filterOut = state[call].p1;
+                                        break;
+                                    case 4:
+                                        state[call].p1 += Math.max(state[call].p2 += (f - state[call].p1 - state[call].p2 * (1 - resonance)), -fr * fr);
+                                        state[call].p3 += Math.min(state[call].p4 += (f - state[call].p3 - state[call].p4 * (1 - resonance)), fr * fr);
+                                        filterOut = (state[call].p1 + state[call].p3) / 2;
+                                        break;
+                                }
+
+                                if (filterType == 2) {
+                                    output[i] = ff - filterOut;
+                                } else {
+                                    output[i] = filterOut;
+                                }
+                            }
+                        }
+
+                        return function nonlinearFilterProcessor(e) {
+                            const inputL = e.inputBuffer.getChannelData(0);
+                            const inputR = e.inputBuffer.getChannelData(1);
+                            const outputL = e.outputBuffer.getChannelData(0);
+                            const outputR = e.outputBuffer.getChannelData(1);
+
+                            const cutoff = parseFloat(document.getElementById('nonlinearFilterFrequencyValue').value);
+                            const resonance = parseFloat(document.getElementById('nonlinearFilterResonanceValue').value);
+                            const mode = parseInt(document.getElementById('nonlinearFilterMode').value, 10);
+                            const filterType = document.getElementById('nonlinearFilterType').value;
+
+                            processChannel(inputL, outputL, cutoff, resonance, mode, stateL, filterType);
+                            processChannel(inputR, outputR, cutoff, resonance, mode, stateR, filterType);
+                        };
+                    }
+
+                    // Usage
+                    const nonlinearBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(nonlinearBufferSize, 2, 2);
+                    filter.onaudioprocess = createNonlinearFilterProcessor();
+                break;
+                    case 'phaser':
+                    function createPhaserProcessor() {
+                        const PhaserStateL = [{ pi: 0, p1: 0, p2: 0, p3: 0, p4: 0, j: 0, j_: 0 }];
+                        const PhaserStateR = [{ pi: 0, p1: 0, p2: 0, p3: 0, p4: 0, j: 0, j_: 0 }];
+                        const LFO = { lfoPhase: 0, time: 0 };
+
+                        function ap2(input, ag = 0, pol = 1, state, call) {
+                            if (!state[call]) {
+                                state[call] = { p1: 0, p2: 0, p3: 0, p4: 0 }; // Ensure state[call] exists
+                            }
+
+                            const s = state[call];
+                            const a = Math.max(Math.min(ag, 0.99999), 0);
+
+                            // First all-pass
+                            const y1 = -a * input + s.p1 + a * s.p2;
+                            s.p1 = input;
+                            s.p2 = y1;
+
+                            // Second all-pass
+                            const y2 = -a * y1 + s.p3 + a * s.p4;
+                            s.p3 = y1;
+                            s.p4 = y2;
+
+                            return [y1, y2][pol];
+                        }
+
+                        function processChannel(input, output, cutoffMin, cutoffMax, resonance, mode, state, LFO, bands, wet) {
+                            const lfoRate = parseFloat(document.getElementById('phaserRateSlider').value);
+                            const lfoDepth = cutoffMax - cutoffMin;
+
+                            const LFOcode = document.getElementById('PhasercustomWaveform').value;
+                            const lfoWaveform = document.getElementById('PhaserWaveType').value;
+
+                            let PHcompiled = (x) => Math.sin(x*Math.PI)/2+.5
+                            try {
+                                PHcompiled = new Function('x', `return ${LFOcode||'Math.sin(x*Math.PI)/2+.5'}`);
+                            } catch (error) {
+                                PHcompiled = (x) => Math.sin(x*Math.PI)/2+.5
+                            }
+
+                                for (let i = 0; i < input.length; i++) {
+                                    const ff = input[i];
+                                    let filterOut = ff;
+
+                                    //case of an error
+                                    let lfoValue = Math.acos(-Math.sin(2 * Math.PI * LFO.lfoPhase)) / Math.PI;
+
+                                    switch (lfoWaveform) {
+                                        case 'sine':
+                                            lfoValue = (Math.sin(2 * Math.PI * LFO.lfoPhase) + 1) / 2;
+                                            break;
+                                        case 'square':
+                                            lfoValue = LFO.lfoPhase%1 < 0.5 ? 1 : 0
+                                            break;
+                                        case 'sawtooth':
+                                            lfoValue = (LFO.lfoPhase%1);
+                                            break;
+                                        case 'triangle':
+                                            lfoValue = Math.acos(-Math.sin(2 * Math.PI * LFO.lfoPhase)) / Math.PI
+                                            break;
+                                        case 'custom':
+                                            lfoValue = PHcompiled(LFO.lfoPhase);
+                                            break;
+                                        default:
+                                            lfoValue = Math.sin(2 * Math.PI * LFO.lfoPhase);
+                                    }
+
+                                // LFO modulation
+                                
+                                const cutoff = cutoffMin + lfoValue * lfoDepth;
+
+                                // Ensure state[0] exists and has required fields
+                                if (!state[0]) {
+                                    state[0] = { j: 0, j_: 0 }; // Initialize state[0] if undefined
+                                }
+
+                                const s = state[0];
+                                s.j_ = ff;
+                                s.j = s.j_ + s.j * (mode & 1 ? -resonance : resonance);
+
+                                const iterations = bands;
+                                for (let j = 1; j <= iterations; j++) {
+                                    s.j = ap2(s.j, 1 - cutoff ** 2, 1, state, j);
+                                }
+
+                                filterOut = s.j_ * (1 - Math.abs(wet)) + s.j * wet
+
+                                output[i] = filterOut
+
+                                // Update LFO phase
+                                LFO.lfoPhase += lfoRate / audioContext.sampleRate;
+                                LFO.time += .5 / audioBuffer.sampleRate
+                                if (LFO.time > audioBuffer.duration) {
+                                    LFO.lfoPhase = 0
+                                    LFO.time = 0;
+                                };
+                            }
+                        }
+
+                        return function phaserProcessor(e) {
+                            const inputL = e.inputBuffer.getChannelData(0);
+                            const inputR = e.inputBuffer.getChannelData(1);
+                            const outputL = e.outputBuffer.getChannelData(0);
+                            const outputR = e.outputBuffer.getChannelData(1);
+
+                            const cutoffMin = parseFloat(document.getElementById('phaserMinFrequencySlider').value);
+                            const cutoffMax = parseFloat(document.getElementById('phaserMaxFrequencySlider').value);
+                            const resonance = parseFloat(document.getElementById('phaserFeedbackSlider').value);
+                            const PhaserBands = parseFloat( document.getElementById('PhaserBands').value)
+                            const phaserWet = parseFloat(document.getElementById('PhaserWetSlider').value);
+
+                            // Process left and right channels
+                            processChannel(inputL, outputL, cutoffMin, cutoffMax, resonance, 0, PhaserStateL, LFO, PhaserBands, phaserWet);
+                            processChannel(inputR, outputR, cutoffMin, cutoffMax, resonance, 0, PhaserStateR, LFO, PhaserBands, phaserWet);
+                        };
+                    }
+
+                    // Usage
+                    const PhaserBufferSize = 4096;
+                    filter = audioContext.createScriptProcessor(PhaserBufferSize, 2, 2);
+                    filter.onaudioprocess = createPhaserProcessor();
+                        break;
+                        
+                default:
+                    filter = audioContext.createBiquadFilter();
+                    filter.type = filterType;
+                    filter.frequency.value = parseFloat(document.getElementById('frequencySlider').value);
+                    filter.Q.value = parseFloat(document.getElementById('resonanceSlider').value);
+            }
+
+            gainNode = audioContext.createGain();
+            limiter = audioContext.createDynamicsCompressor();
+            limiter.threshold.value = parseFloat(document.getElementById('limiterThresholdSlider').value);
+            limiter.knee.value = 0;
+            limiter.ratio.value = 20;
+            limiter.attack.value = 0;
+            limiter.release.value = 0.1;
+
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 8192;
+
+            dcRemovalFilter = audioContext.createBiquadFilter();
+            dcRemovalFilter.type = 'highpass';
+            dcRemovalFilter.frequency.value = 20;
+            source.connect(filter);
+            filter.connect(gainNode);
+
+            if (document.getElementById('dcRemovalToggle').checked) {
+                gainNode.connect(dcRemovalFilter);
+                dcRemovalFilter.connect(limiter);
+            } else {
+                gainNode.connect(limiter);
+            }
+
+            limiter.connect(analyser);
+
+            if (document.getElementById('limiterToggle').checked) {
+                analyser.connect(audioContext.destination);
+            } else {
+                gainNode.connect(audioContext.destination);
+            }
+
+            updateVolume();
+        }
+        
+        document.getElementById('customCodeInput').addEventListener('input', function() {
+            const errorContainer = document.getElementById('errorContainer');
+            try {
+                const code = this.value;
+                customProcessingFunction = new Function('x', code);
+                errorContainer.style.color = '#00ff00';
+                errorContainer.textContent = 'Status: OK ';
+            } catch (error) {
+                console.error('Invalid JavaScript in JS Audio Processing:', error);
+                errorContainer.style.color = '#ff0000';
+                errorContainer.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        function custom(amount) {
+            const n_samples = 44100;
+            const curve = new Float32Array(n_samples);
+            for (let i = 0; i < n_samples; ++i) {
+                const x = (i*2)/n_samples - 1;
+                buffer = 0;
+                this.buffer??=0
+                const hz = parseFloat(document.getElementById('frequencySlider').value);
+                const rs = parseFloat(document.getElementById('resonanceSlider').value);
+                try {
+                    curve[i] = customProcessingFunction(x);
+                } catch (error) {
+                    const errorContainer = document.getElementById('errorContainer');
+                    errorContainer.style.color = '#ff0000';
+                    errorContainer.textContent = `Error: ${error.message}`;
+                    return new Float32Array(n_samples);
+                }
+            }
+            return curve;
+        }
+
+        function customx(amount) {
+            const n_samples = 44100;
+            const curve = new Float32Array(n_samples);
+            const distortionAmount = parseFloat(document.getElementById('distortionSlider').value);
+            for (let i = 0; i < n_samples; ++i) {
+                const x = (i*2)/n_samples - 1;
+                curve[i] = m.min(m.max(x * (1+m.pow((distortionAmount)/1000,3)*10000),-1),1);
+            }
+            return curve;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            function addSafeEventListener(id, event, handler) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener(event, handler);
+                } else {
+                    console.warn(`Element with id '${id}' not found`);
+                }
+        }
+
+        /*document.getElementById('FlangercustomWaveform').addEventListener('input', (event) => {
+            const expression = event.target.value;
+            compileCustomWaveform(expression);
+        });*/
+
+        let audioContext;
+        let gainNode;
+        let limiter;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioContext.createGain();
+                limiter = audioContext.createDynamicsCompressor();
+                limiter.threshold.setValueAtTime(-0.5, audioContext.currentTime);
+                limiter.knee.setValueAtTime(0, audioContext.currentTime);
+                limiter.ratio.setValueAtTime(20, audioContext.currentTime);
+                limiter.attack.setValueAtTime(0, audioContext.currentTime);
+                limiter.release.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.connect(limiter);
+                limiter.connect(audioContext.destination);
+            }
+        }
+
+        addSafeEventListener('frequencySlider', 'input', updateFrequency);
+        addSafeEventListener('frequencyInput', 'input', updateFrequency);
+        addSafeEventListener('resonanceSlider', 'input', updateResonance);
+        addSafeEventListener('resonanceInput', 'input', updateResonance);
+        addSafeEventListener('distortionSlider', 'input', updateDistortion);
+        addSafeEventListener('distortionInput', 'input', updateDistortion);
+        addSafeEventListener('volumeSlider', 'input', updateVolume);
+        addSafeEventListener('volumeInput', 'input', updateVolume);
+        addSafeEventListener('flangerDelaySlider', 'input', updateFlangerDelay);
+        addSafeEventListener('flangerDelayInput', 'input', updateFlangerDelay);
+        addSafeEventListener('flangerDepthSlider', 'input', updateFlangerDepth);
+        addSafeEventListener('flangerDepthInput', 'input', updateFlangerDepth);
+        addSafeEventListener('flangerFeedbackSlider', 'input', updateFlangerFeedback);
+        addSafeEventListener('flangerFeedbackInput', 'input', updateFlangerFeedback);
+        addSafeEventListener('flangerRateSlider', 'input', updateFlangerRate);
+        addSafeEventListener('flangerRateInput', 'input', updateFlangerRate);
+        addSafeEventListener('convolverDurationSlider', 'input', updateConvolverDuration);
+        addSafeEventListener('convolverDurationInput', 'input', updateConvolverDuration);
+        addSafeEventListener('moogCutoffSlider', 'input', updateMoogCutoff);
+        addSafeEventListener('moogCutoffInput', 'input', updateMoogCutoff);
+        addSafeEventListener('moogResonanceSlider', 'input', updateMoogResonance);
+        addSafeEventListener('moogResonanceInput', 'input', updateMoogResonance);
+        addSafeEventListener('bitcrusherBitsSlider', 'input', updateBitcrusherBits);
+        addSafeEventListener('bitcrusherBitsInput', 'input', updateBitcrusherBits);
+        addSafeEventListener('bitcrusherNormfreqSlider', 'input', updateBitcrusherNormfreq);
+        addSafeEventListener('bitcrusherNormfreqInput', 'input', updateBitcrusherNormfreq);
+        addSafeEventListener('limiterThresholdSlider', 'input', updateLimiterThreshold);
+        addSafeEventListener('limiterThresholdInput', 'input', updateLimiterThreshold);
+        addSafeEventListener('dcRemovalToggle', 'change', setupAudioGraph);
+        addSafeEventListener('ringmodFrequencySlider', 'input', updateRingmodFrequency);
+        addSafeEventListener('ringmodFrequencyInput', 'input', updateRingmodFrequency);
+        addSafeEventListener('ringmodDepthSlider', 'input', updateRingmodDepth);
+        addSafeEventListener('ringmodDepthInput', 'input', updateRingmodDepth);
+        addSafeEventListener('ringmodWaveType', 'change', updateFilter);
+        addSafeEventListener('vibratoRateSlider', 'input', updateVibratoRate);
+        addSafeEventListener('vibratoRateInput', 'input', updateVibratoRate);
+        addSafeEventListener('vibratoDepthSlider', 'input', updateVibratoDepth);
+        addSafeEventListener('vibratoDepthInput', 'input', updateVibratoDepth);
+        addSafeEventListener('vibratoWaveType', 'change', updateFilter);
+        addSafeEventListener('pitchShiftSlider', 'input', updatePitchShift);
+        addSafeEventListener('pitchShiftInput', 'input', updatePitchShift);
+        addSafeEventListener('pitchShiftQualitySlider', 'input', updatePitchShiftQuality);
+        addSafeEventListener('pitchShiftQualityInput', 'input', updatePitchShiftQuality);
+        addSafeEventListener('phaserRateSlider', 'input', updatePhaserRate);
+        addSafeEventListener('phaserRateInput', 'input', updatePhaserRate); 
+        addSafeEventListener('phaserMinFrequencySlider', 'input', updatePhaserMinFrequency);
+        addSafeEventListener('phaserMinFrequencyInput', 'input', updatePhaserMinFrequency);
+        addSafeEventListener('phaserMaxFrequencySlider', 'input', updatePhaserMaxFrequency);
+        addSafeEventListener('phaserMaxFrequencyInput', 'input', updatePhaserMaxFrequency);
+        addSafeEventListener('phaserFeedbackSlider', 'input', updatePhaserFeedback);
+        addSafeEventListener('phaserFeedbackInput', 'input', updatePhaserFeedback);
+        addSafeEventListener('PhaserBands', 'input', updateFilter);
+        addSafeEventListener('PhaserWetSlider', 'input', updatePhaserWet);
+        addSafeEventListener('PhaserWetInput', 'input', updatePhaserWet);
+        addSafeEventListener('PhasercustomWaveform', 'input', updateFilter);
+        addSafeEventListener('PhaserWaveType', 'input', updateFilter);
+
+        document.getElementById('saveOffset').addEventListener('input', (event) => {
+            const value = parseFloat(event.target.value);
+            document.getElementById('saveOffsetInput').value = value;
+        });
+
+        document.getElementById('saveOffsetInput').addEventListener('input', (event) => {
+            const value = parseFloat(event.target.value);
+            document.getElementById('saveOffset').value = value;
+        });
+
+        function updatePhaserWet(event) {
+            const value = event.target.value;
+            document.getElementById('PhaserWetSlider').value = value;
+            document.getElementById('PhaserWetInput').value = value;
+            updateFilter();
+        }
+
+        function updatePhaserRate(event) {
+            const value = event.target.value;
+            document.getElementById('phaserRateSlider').value = value;
+            document.getElementById('phaserRateInput').value = value;
+            //document.getElementById('phaserRateValue').textContent = value + ' Hz';
+            updateFilter();
+        }
+
+        function updatePhaserMinFrequency(event) {
+            const value = event.target.value;
+            document.getElementById('phaserMinFrequencySlider').value = value;
+            document.getElementById('phaserMinFrequencyInput').value = value;
+            //document.getElementById('phaserMinFrequencyValue').textContent = value + ' Hz';
+            updateFilter();
+        }
+
+        function updatePhaserMaxFrequency(event) {
+            const value = event.target.value;
+            document.getElementById('phaserMaxFrequencySlider').value = value;
+            document.getElementById('phaserMaxFrequencyInput').value = value;
+            //document.getElementById('phaserMaxFrequencyValue').textContent = value + ' Hz';
+            updateFilter();
+        }
+
+        function updatePhaserFeedback(event) {
+            const value = event.target.value;
+            document.getElementById('phaserFeedbackSlider').value = value;
+            document.getElementById('phaserFeedbackInput').value = value;
+            //document.getElementById('phaserFeedbackValue').textContent = value + ' dB';
+            updateFilter();
+        }
+
+        function updatePitchShift(event) {
+            const value = event.target.value;
+            document.getElementById('pitchShiftSlider').value = value;
+            document.getElementById('pitchShiftInput').value = value;
+            document.getElementById('pitchShiftValue').textContent = value + ' semitones';
+            updateFilter();
+        }
+
+        function updatePitchShiftQuality(event) {
+            const value = event.target.value;
+            document.getElementById('pitchShiftQualitySlider').value = value;
+            document.getElementById('pitchShiftQualityInput').value = value;
+            document.getElementById('pitchShiftQualityValue').textContent = value +' samples';
+            updateFilter();
+        }
+
+        function updateVibratoRate(event) {
+            const value = event.target.value;
+            document.getElementById('vibratoRateSlider').value = value;
+            document.getElementById('vibratoRateInput').value = value;
+            document.getElementById('vibratoRateValue').textContent = value + ' Hz';
+            updateFilter();
+        }
+
+        function updateVibratoDepth(event) {
+            const value = event.target.value;
+            document.getElementById('vibratoDepthSlider').value = value;
+            document.getElementById('vibratoDepthInput').value = value;
+            document.getElementById('vibratoDepthValue').textContent = value + ' cents';
+            updateFilter();
+        }
+
+        function updateRingmodFrequency(event) {
+            const value = event.target.value;
+            document.getElementById('ringmodFrequencySlider').value = value;
+            document.getElementById('ringmodFrequencyInput').value = value;
+            document.getElementById('ringmodFrequencyValue').textContent = value + ' Hz';
+            updateFilter();
+        }
+
+        function updateRingmodDepth(event) {
+            const value = event.target.value;
+            document.getElementById('ringmodDepthSlider').value = value;
+            document.getElementById('ringmodDepthInput').value = value;
+            document.getElementById('ringmodDepthValue').textContent = value;
+            updateFilter();
+        }
+
+        addSafeEventListener('ringmodFrequencySlider', 'input', (event) => {
+            document.getElementById('ringmodFrequencyValue').textContent = event.target.value + ' Hz';
+            updateFilter();
+        });
+        addSafeEventListener('ringmodDepthSlider', 'input', (event) => {
+            document.getElementById('ringmodDepthValue').textContent = event.target.value;
+            updateFilter();
+        });
+        addSafeEventListener('ringmodWaveType', 'change', updateFilter);
+
+        function updateFrequency(event) {
+            updateSliderAndInput('frequency', event.target.value, 'Hz', updateFilter);
+        }
+
+        function updateResonance(event) {
+            updateSliderAndInput('resonance', event.target.value, '', updateFilter);
+        }
+
+        function updateDistortion(event) {
+            const value = event.target.value;
+            updateSliderAndInput('distortion', value, '', updateFilter);
+            document.getElementById('distortionValue').textContent = value === '1000' ? 'OVERDRIVE!!!' : value;
+        }
+
+        function updateVolume(event) {
+            const volume = parseFloat(event.target.value);
+
+            // Ensure audioContext and gainNode are initialized
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (!gainNode) {
+                gainNode = audioContext.createGain();
+                gainNode.connect(audioContext.destination);
+            }
+
+            // Update gain value
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            document.getElementById('volumeValue').textContent = `${(volume * 100).toFixed(0)}%`;
+        }
+
+        function updateFlangerDelay(event) {
+            updateSliderAndInput('flangerDelay', event.target.value, 's', updateFilter);
+        }
+
+        function updateFlangerDepth(event) {
+            updateSliderAndInput('flangerDepth', event.target.value, '', updateFilter);
+        }
+
+        function updateFlangerFeedback(event) {
+            updateSliderAndInput('flangerFeedback', event.target.value, '', updateFilter);
+        }
+
+        function updateFlangerRate(event) {
+            updateSliderAndInput('flangerRate', event.target.value, 'Hz', updateFilter);
+        }
+
+        function updateConvolverDuration(event) {
+            updateSliderAndInput('convolverDuration', event.target.value, 's', updateFilter);
+        }
+
+        function updateMoogCutoff(event) {
+            updateSliderAndInput('moogCutoff', event.target.value, '', updateFilter);
+        }
+
+        function updateMoogResonance(event) {
+            updateSliderAndInput('moogResonance', event.target.value, '', updateFilter);
+        }
+
+        function updateBitcrusherBits(event) {
+            updateSliderAndInput('bitcrusherBits', event.target.value, '', updateFilter);
+        }
+
+        function updateBitcrusherNormfreq(event) {
+            updateSliderAndInput('bitcrusherNormfreq', event.target.value, '', updateFilter);
+        }
+
+        function updateLimiterThreshold(event) {
+            const threshold = parseFloat(event.target.value);
+            updateSliderAndInput('limiterThreshold', threshold, 'dB', () => {
+                if (limiter) {
+                    limiter.threshold.setValueAtTime(threshold, audioContext.currentTime);
+                }
+            });
+        }
+
+        function updateSliderAndInput(name, value, unit, callback) {
+            const slider = document.getElementById(`${name}Slider`);
+            const input = document.getElementById(`${name}Input`);
+            const display = document.getElementById(`${name}Value`);
+            
+            if (slider) slider.value = value;
+            if (input) input.value = value;
+            if (display) display.textContent = unit ? `${value} ${unit}` : value;
+            
+            if (callback) callback();
+        }
+
+        function setupAudioGraph() {
+            if (!audioContext) {
+                initAudio();
+            }
+        }
+    });
+        
+
+        function updateFilter() {
+            if (!filter) return;
+
+            const filterType = document.getElementById('filterType').value;
+
+            switch (filterType) {
+                case 'convolver':
+                    const convolverDuration = parseFloat(document.getElementById('convolverDurationSlider').value);
+                    break;
+                case 'moog':
+                    const moogCutoff = parseFloat(document.getElementById('moogCutoffSlider').value);
+                    const moogResonance = parseFloat(document.getElementById('moogResonanceSlider').value);
+                    break;
+                case 'bitcrusher':
+                    const bitcrusherBits = parseInt(document.getElementById('bitcrusherBitsSlider').value);
+                    const bitcrusherNormfreq = parseFloat(document.getElementById('bitcrusherNormfreqSlider').value);
+                case 'flanger':
+                    const depth = parseFloat(document.getElementById('flangerDepthSlider').value);
+                    const feedback = parseFloat(document.getElementById('flangerFeedbackSlider').value);
+                    const rate = parseFloat(document.getElementById('flangerRateSlider').value);
+                    const waveType = document.getElementById('flangerWaveType').value;
+                    const invertFlanger = document.getElementById('flangerInvert').checked;
+                    break;
+                case 'Distortion':
+                    filter.curve = customx();
+                    break;
+                case 'ringmod':
+                    const ringmodFrequency = parseFloat(document.getElementById('ringmodFrequencySlider').value);
+                    const ringmodDepth = parseFloat(document.getElementById('ringmodDepthSlider').value);
+                    const ringmodWaveType = document.getElementById('ringmodWaveType').value;
+                    break;
+                case 'vibrato':
+                    const vibratoRate = parseFloat(document.getElementById('vibratoRateSlider').value);
+                    const vibratoDepth = parseFloat(document.getElementById('vibratoDepthSlider').value);
+                    const vibratoWaveType = document.getElementById('vibratoWaveType').value;
+                    break;
+                case 'pitch':
+                    const pitchShift = parseFloat(document.getElementById('pitchShiftSlider').value);
+                    const pitchQuality = Math.min(14, Math.max(8, parseFloat(document.getElementById('pitchShiftQualitySlider').value)));
+                    break;
+                case 'nonlinearFilter':
+                    const nonlinearFilterType = document.getElementById('nonlinearFilterType').value;
+                    const nonlinearFilterCutoff = parseFloat(document.getElementById('nonlinearFilterFrequencyValue').value);
+                    const nonlinearFilterResonance = parseFloat(document.getElementById('nonlinearFilterResonanceValue').value);
+                    const nonlinearFilterMode = parseInt(document.getElementById('nonlinearFilterMode').value, 10);
+                    break;
+                case 'phaser':
+                    const phaserMinFrequency = parseFloat(document.getElementById('phaserMinFrequencySlider').value);
+                    const phaserMaxFrequency = parseFloat(document.getElementById('phaserMaxFrequencySlider').value);
+                    const phaserFeedback = parseFloat(document.getElementById('phaserFeedbackSlider').value);
+                    const phaserRate = parseFloat(document.getElementById('phaserRateSlider').value);
+                    break;
+                default:
+                    if (filter instanceof BiquadFilterNode) {
+                        filter.frequency.value = parseFloat(document.getElementById('frequencySlider').value);
+                        filter.Q.value = parseFloat(document.getElementById('resonanceSlider').value);
+                    }
+            }
+        }
+        
+        function updateVolume() {
+            const volume = parseFloat(document.getElementById('volumeSlider').value);
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            document.getElementById('volumeValue').textContent = `${m.round(volume * 100)}%`;
+        }
+
+        document.getElementById('playPause').addEventListener('click', () => {
+            if (!audioBuffer) {
+                document.getElementById('audioWarning').style.display = 'block';
+                return;
+            }
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (!isPlaying) {
+                setupAudioGraph();
+                source.start();
+                isPlaying = true;
+                visualize();
+                startTime = audioContext.currentTime;
+                updateDuration();
+                if (videoPlayer.src) {
+                    videoPlayer.muted = true;
+                    videoPlayer.play().catch(e => console.error("Error playing video:", e));
+                }
+            } else {
+                source.stop();
+                isPlaying = false;
+                clearInterval(durationInterval);
+                updateDurationDisplay(0, audioBuffer.duration);
+                if (videoPlayer.src) {
+                    videoPlayer.pause();
+                    videoPlayer.currentTime = 0;
+            }
+        }});
+
+        document.getElementById('filterType').addEventListener('change', function() {
+            filterType = this.value;
+            if (isPlaying) {
+                source.stop();
+                isPlaying = false;
+                clearInterval(durationInterval);
+                updateDurationDisplay(0, audioBuffer.duration);
+                
+                // Stop and reset the video player
+                const videoPlayer = document.getElementById('videoPlayer');
+                if (videoPlayer.src) {
+                    videoPlayer.pause();
+                    videoPlayer.currentTime = 0;
+                }
+            }
+            setupAudioGraph();
+        });
+
+        document.getElementById('filterType').addEventListener('change', (event) => {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (!isPlaying) {
+                if (videoPlayer.src) {
+                    videoPlayer.muted = true;
+                    videoPlayer.play().catch(e => console.error("Error playing video:", e));
+                }
+            } else {
+                source.stop();
+                isPlaying = false;
+                clearInterval(durationInterval);
+                if (videoPlayer.src) {
+                    videoPlayer.pause();
+                    videoPlayer.currentTime = 0;
+                }
+            }
+        });
+
+        document.getElementById('frequencySlider').addEventListener('input', (event) => {
+            document.getElementById('frequencyValue').textContent = `${event.target.value} Hz`;
+            updateFilter();
+        });
+
+        document.getElementById('resonanceSlider').addEventListener('input', (event) => {
+            document.getElementById('resonanceValue').textContent = event.target.value;
+            updateFilter();
+        });
+
+        document.getElementById('distortionSlider').addEventListener('input', (event) => {
+            const distortionValue = parseInt(event.target.value);
+            document.getElementById('distortionValue').textContent = distortionValue;
+            if (distortionValue === 1000) {
+                document.getElementById('distortionValue').textContent= 'OVERDRIVE!!!';
+            }
+            updateFilter();
+        });
+        document.getElementById('volumeSlider').addEventListener('input', updateVolume);
+
+        document.getElementById('limiterToggle').addEventListener('change', () => {
+            if (isPlaying) {
+                const currentTime = audioContext.currentTime;
+                source.stop(currentTime);
+                setupAudioGraph();
+                source.start(currentTime);
+            } else {
+                setupAudioGraph();
+            }
+        });
+
+        document.getElementById('convolverDurationSlider').addEventListener('input', (event) => {
+            document.getElementById('convolverDurationValue').textContent = `${event.target.value} s`;
+            updateFilter();
+        });
+
+        document.getElementById('moogCutoffSlider').addEventListener('input', (event) => {
+            document.getElementById('moogCutoffValue').textContent = `${event.target.value}`;
+            updateFilter();
+        });
+
+        document.getElementById('moogResonanceSlider').addEventListener('input', (event) => {
+            document.getElementById('moogResonanceValue').textContent = event.target.value;
+            updateFilter();
+        });
+
+        document.getElementById('bitcrusherBitsSlider').addEventListener('input', (event) => {
+            document.getElementById('bitcrusherBitsValue').textContent = event.target.value;
+            updateFilter();
+        });
+
+        document.getElementById('bitcrusherNormfreqSlider').addEventListener('input', (event) => {
+            document.getElementById('bitcrusherNormfreqValue').textContent = event.target.value;
+            updateFilter();
+        });
+
+        document.getElementById('limiterThresholdSlider').addEventListener('input', (event) => {
+            const threshold = parseFloat(event.target.value);
+            document.getElementById('limiterThresholdValue').textContent = `${threshold.toFixed(1)} dB`;
+            if (limiter) {
+                limiter.threshold.setValueAtTime(threshold, audioContext.currentTime);
+            }
+        });
+
+        document.getElementById('visualiserType').addEventListener('click', () => {
+            switch (visualiserMode) {
+                case 'frequency-log':
+                    visualiserMode = 'frequency-linear';
+                    document.getElementById('visualiserType').textContent = 'Visualiser: Frequency Linear';
+                    break;
+                case 'frequency-linear':
+                    visualiserMode = 'oscilloscope';
+                    document.getElementById('visualiserType').textContent = 'Visualiser: Oscilloscope';
+                    break;
+                case 'oscilloscope':
+                    visualiserMode = 'frequency-log';
+                    document.getElementById('visualiserType').textContent = 'Visualiser: Frequency Log';
+                    break;
+            }
+        });
+
+        document.getElementById('flangerDelaySlider').addEventListener('input', (event) => {
+            const delay = parseFloat(event.target.value);
+            document.getElementById('flangerDelayValue').textContent = `${delay.toFixed(4)} s`;
+            updateFilter();
+        });
+
+        document.getElementById('flangerDepthSlider').addEventListener('input', (event) => {
+            const depth = parseFloat(event.target.value);
+            document.getElementById('flangerDepthValue').textContent = depth.toFixed(4);
+            updateFilter();
+        });
+
+        document.getElementById('flangerRateSlider').addEventListener('input', (event) => {
+            const rate = parseFloat(event.target.value);
+            document.getElementById('flangerRateValue').textContent = `${rate.toFixed(3)} Hz`;
+            updateFilter();
+        });
+
+        document.getElementById('flangerFeedbackSlider').addEventListener('input', (event) => {
+            const feedback = parseFloat(event.target.value);
+            document.getElementById('flangerFeedbackValue').textContent = feedback.toFixed(2);
+            updateFilter();
+        });
+
+        document.getElementById('flangerWaveType').addEventListener('change', updateFilter);
+
+        document.getElementById('nonlinearFilterFrequencyValue').addEventListener('input', (event) => {
+            const value = event.target.value;
+            document.getElementById('nonlinearFilterFrequencyInput').value = value;
+            updateFilter(); // Update audio processing
+        });
+
+        document.getElementById('nonlinearFilterFrequencyInput').addEventListener('input', (event) => {
+            const value = event.target.value;
+            document.getElementById('nonlinearFilterFrequencyValue').value = value;
+            updateFilter(); // Update audio processing
+        });
+
+        document.getElementById('nonlinearFilterResonanceValue').addEventListener('input', (event) => {
+            const value = event.target.value;
+            document.getElementById('nonlinearFilterResonanceInput').value = value;
+            updateFilter(); // Update audio processing
+        });
+
+        document.getElementById('nonlinearFilterResonanceInput').addEventListener('input', (event) => {
+            const value = event.target.value;
+            document.getElementById('nonlinearFilterResonanceValue').value = value;
+            updateFilter(); // Update audio processing
+        });
+
+        document.getElementById('nonlinearFilterType').addEventListener('change', updateFilter);
+        document.getElementById('nonlinearFilterMode').addEventListener('change', updateFilter);
+
+        function updateDuration() {
+            durationInterval = setInterval(() => {
+                const currentTime = (audioContext.currentTime - startTime) % audioBuffer.duration;
+                updateDurationDisplay(currentTime, audioBuffer.duration);
+                
+                // Synchronize video with audio
+                const videoPlayer = document.getElementById('videoPlayer');
+                if (videoPlayer.src && !videoPlayer.paused) {
+                    if (Math.abs(videoPlayer.currentTime - currentTime) > 0.1) {
+                        videoPlayer.currentTime = currentTime;
+                    }
+                }
+            }, 10);
+        }
+
+        function updateDurationDisplay(currentTime, totalDuration) {
+            const formatTime = (time) => {
+                const minutes = m.floor(time / 60);
+                const seconds = m.floor(time % 60);
+                const milliseconds = m.floor((time % 1) * 1000);
+                return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(3, '0')}`;
+            };
+            durationCounter.textContent = `Duration: ${formatTime(currentTime)} / ${formatTime(totalDuration)}`;
+        }
+
+        function visualize() {
+            if (isMobile()) {
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+                canvasCtx.font = '16px Arial';
+                canvasCtx.textAlign = 'center';
+                canvasCtx.textBaseline = 'right';
+                canvasCtx.fillText('Due to bugs that i cannot fix', canvas.width / 4, canvas.height / 4);
+                canvasCtx.fillText('this is not available on mobile', canvas.width / 4, canvas.height / 3.25);
+                return;
+            }
+
+            const WIDTH = canvas.width;
+            const HEIGHT = canvas.height;
+
+            analyser.fftSize = 2048;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            function draw() {
+                requestAnimationFrame(draw);
+
+                if (visualiserMode === 'oscilloscope') {
+                    analyser.getByteTimeDomainData(dataArray);
+                    canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+                    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+                    canvasCtx.lineWidth = 2;
+                    const gradient = canvasCtx.createLinearGradient(0, 0, WIDTH, 0);
+                    gradient.addColorStop(0, 'rgb(0, 0, 255)');
+                    gradient.addColorStop(0.5, 'rgb(255, 0, 255)');
+                    gradient.addColorStop(1, 'rgb(255, 0, 0)');
+                    canvasCtx.strokeStyle = gradient;
+
+                    canvasCtx.beginPath();
+
+                    const sliceWidth = WIDTH * 1.0 / bufferLength;
+                    let x = 0;
+                    let startIndex = 0;
+                    let canSync = false;
+                    for (let i = 0; i < bufferLength - 1; i++) {
+                        if (dataArray[i] < 128 && dataArray[i + 1] >= 128) {
+                            startIndex = i;
+                            canSync = true;
+                            break;
+                        }
+                    }
+
+                    for (let i = 0; i < bufferLength; i++) {
+                        const index = (startIndex + i) % bufferLength;
+                        const v = 2-dataArray[index] / 128.0;
+                        const y = v * HEIGHT / 2;
+
+                        if (i === 0) {
+                            canvasCtx.moveTo(x, y);
+                        } else {
+                            canvasCtx.lineTo(x, y);
+                        }
+
+                        x += sliceWidth;
+                    }
+
+                    canvasCtx.lineTo(WIDTH, HEIGHT / 2);
+                    canvasCtx.stroke();
+
+                    canvasCtx.beginPath();
+                    canvasCtx.arc(10, 10, 5, 0, 2 * m.PI);
+                    canvasCtx.fillStyle = canSync ? 'white' : 'gray';
+                    canvasCtx.fill();
+                } else {
+                    analyser.getByteFrequencyData(dataArray);
+
+                    canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+                    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo(0, HEIGHT);
+
+                    for(let i = 0; i < bufferLength; i++) {
+                        const barHeight = dataArray[i];
+                        let x;
+                        if (visualiserMode === 'frequency-log') {
+                            x = m.log(i + 1) / m.log(bufferLength) * WIDTH;
+                        } else {
+                            x = (i / bufferLength) * WIDTH;
+                        }
+
+                        const y = HEIGHT - barHeight * HEIGHT / 255;
+
+                        canvasCtx.lineTo(x, y);
+                    }
+
+                    canvasCtx.strokeStyle = 'rgb(255, 255, 255)';
+                    canvasCtx.lineWidth = 2;
+                    canvasCtx.stroke();
+
+                    const gradient = canvasCtx.createLinearGradient(0, HEIGHT, WIDTH, HEIGHT);
+                    for (let i = 0; i <= 1; i += 0.01) {
+                        const hue = visualiserMode === 'frequency-log' ? (m.pow(i, 6.5)) * 120 + 240 : i * 120 + 240;
+                        gradient.addColorStop(i, `hsl(${hue}, 100%, 50%)`);
+                    }
+                    canvasCtx.lineTo(WIDTH, HEIGHT);
+                    canvasCtx.lineTo(0, HEIGHT);
+                    canvasCtx.fillStyle = gradient;
+                    canvasCtx.fill();
+
+                    for(let i = 0; i < bufferLength; i++) {
+                        const barHeight = dataArray[i];
+                        let x;
+
+                        if (visualiserMode === 'frequency-log') {
+                            x = m.log(i + 1) / m.log(bufferLength) * WIDTH;
+                        } else {
+                            x = (i / bufferLength) * WIDTH;
+                        }
+
+                        const y = HEIGHT - barHeight * HEIGHT / 255;
+
+                        canvasCtx.fillStyle = `hsl(0, 100%, 100%)`;
+                        canvasCtx.fillRect(x, y, 0, 0);
+                    }
+                }}
+            draw();
+        }
+
+
+        async function processAudio() {
+            const saveOffset = parseFloat(document.getElementById('saveOffset').value); // Get the save offset
+            const offsetSamples = Math.floor(saveOffset * audioBuffer.sampleRate); // Convert offset to samples
+
+            const offlineContext = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                audioBuffer.length + offsetSamples, // Add offset samples to the total length
+                audioBuffer.sampleRate
+            );
+
+            const source = offlineContext.createBufferSource();
+            source.buffer = audioBuffer;
+
+            let newFilter;
+            const filterType = document.getElementById('filterType').value;
+
+            // Apply the selected filter (existing logic)
+            switch (filterType) {
+                case 'custom':
+                    newFilter = offlineContext.createWaveShaper();
+                    newFilter.curve = custom();
+                    break;
+                case 'Distortion':
+                    newFilter = offlineContext.createWaveShaper();
+                    newFilter.curve = customx();
+                    break;
+                case 'flanger':
+                    const flangerBufferSize = 4096 * 2;
+                    newFilter = offlineContext.createScriptProcessor(flangerBufferSize, 2, 2);
+                    let delayBufferLeft = new Float32Array(flangerBufferSize).fill(0);
+                    let delayBufferRight = new Float32Array(flangerBufferSize).fill(0);
+                    let delayWritePosition = 0;
+                    let lfoPhase = 0;
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const delayTime = parseFloat(document.getElementById('flangerDelaySlider').value);
+                        const depth = parseFloat(document.getElementById('flangerDepthSlider').value);
+                        const feedback = parseFloat(document.getElementById('flangerFeedbackSlider').value);
+                        const rate = parseFloat(document.getElementById('flangerRateSlider').value);
+                        const waveType = document.getElementById('flangerWaveType').value;
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            let lfoValue;
+                            switch (waveType) {
+                                case 'sine':
+                                    lfoValue = Math.sin(lfoPhase);
+                                    break;
+                                case 'square':
+                                    lfoValue = lfoPhase < Math.PI ? 1 : -1;
+                                    break;
+                                case 'sawtooth':
+                                    lfoValue = (lfoPhase / (2 * Math.PI)) * 2 - 1;
+                                    break;
+                                case 'triangle':
+                                    lfoValue = Math.asin(Math.sin(lfoPhase)) / Math.PI * 2;
+                                    break;
+                                default:
+                                    lfoValue = Math.sin(lfoPhase);
+                            }
+
+                            const delayTimeSamples = Math.max(
+                                0,
+                                Math.min(
+                                    (delayTime + lfoValue * depth * delayTime) * offlineContext.sampleRate,
+                                    flangerBufferSize - 1
+                                )
+                            );
+
+                            let delayReadPosition = delayWritePosition - delayTimeSamples;
+                            if (delayReadPosition < 0) delayReadPosition += flangerBufferSize;
+
+                            const readPosition = Math.floor(delayReadPosition);
+                            const fraction = delayReadPosition - readPosition;
+
+                            const delayedSampleL =
+                                (1 - fraction) * delayBufferLeft[readPosition % flangerBufferSize] +
+                                fraction * delayBufferLeft[(readPosition + 1) % flangerBufferSize];
+                            const delayedSampleR =
+                                (1 - fraction) * delayBufferRight[readPosition % flangerBufferSize] +
+                                fraction * delayBufferRight[(readPosition + 1) % flangerBufferSize];
+
+                            outputL[i] = inputL[i] + delayedSampleL * feedback;
+                            outputR[i] = inputR[i] + delayedSampleR * feedback;
+
+                            delayBufferLeft[delayWritePosition] = inputL[i] + delayedSampleL * feedback;
+                            delayBufferRight[delayWritePosition] = inputR[i] + delayedSampleR * feedback;
+
+                            delayWritePosition = (delayWritePosition + 1) % flangerBufferSize;
+                            lfoPhase += (2 * Math.PI * rate) / offlineContext.sampleRate;
+                            if (lfoPhase > 2 * Math.PI) lfoPhase -= 2 * Math.PI;
+                        }
+                    };
+                    break;
+                case 'convolver':
+                    newFilter = offlineContext.createConvolver();
+                    const convolverDuration = parseFloat(document.getElementById('convolverDurationSlider').value);
+                    const noiseBuffer = offlineContext.createBuffer(2, convolverDuration * offlineContext.sampleRate, offlineContext.sampleRate);
+                    const left = noiseBuffer.getChannelData(0);
+                    const right = noiseBuffer.getChannelData(1);
+                    for (let i = 0; i < noiseBuffer.length; i++) {
+                        left[i] = Math.random() * 2 - 1;
+                        right[i] = Math.random() * 2 - 1;
+                    }
+                    newFilter.buffer = noiseBuffer;
+                    break;
+                case 'moog':
+                    const moogBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(moogBufferSize, 2, 2);
+                    let in1L, in2L, in3L, in4L, out1L, out2L, out3L, out4L;
+                    let in1R, in2R, in3R, in4R, out1R, out2R, out3R, out4R;
+                    in1L = in2L = in3L = in4L = out1L = out2L = out3L = out4L = 0.0;
+                    in1R = in2R = in3R = in4R = out1R = out2R = out3R = out4R = 0.0;
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const cutoff = parseFloat(document.getElementById('moogCutoffSlider').value);
+                        const resonance = parseFloat(document.getElementById('moogResonanceSlider').value);
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            const inputSampleL = inputL[i];
+                            const inputSampleR = inputR[i];
+                            const f = cutoff * 1.16;
+                            const fb = resonance * (1.0 - 0.15 * f * f);
+
+                            let inputMinusL = inputSampleL - out4L * fb;
+                            inputMinusL *= 0.35013 * (f * f) * (f * f);
+                            out1L = inputMinusL + 0.3 * in1L + (1 - f) * out1L;
+                            in1L = inputMinusL;
+                            out2L = out1L + 0.3 * in2L + (1 - f) * out2L;
+                            in2L = out1L;
+                            out3L = out2L + 0.3 * in3L + (1 - f) * out3L;
+                            in3L = out2L;
+                            out4L = out3L + 0.3 * in4L + (1 - f) * out4L;
+                            in4L = out3L;
+                            outputL[i] = out4L;
+
+                            let inputMinusR = inputSampleR - out4R * fb;
+                            inputMinusR *= 0.35013 * (f * f) * (f * f);
+                            out1R = inputMinusR + 0.3 * in1R + (1 - f) * out1R;
+                            in1R = inputMinusR;
+                            out2R = out1R + 0.3 * in2R + (1 - f) * out2R;
+                            in2R = out1R;
+                            out3R = out2R + 0.3 * in3R + (1 - f) * out3R;
+                            in3R = out2R;
+                            out4R = out3R + 0.3 * in4R + (1 - f) * out4R;
+                            in4R = out3R;
+                            outputR[i] = out4R;
+                        }
+                    };
+                    break;
+                case 'bitcrusher':
+                    const bitcrusherBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(bitcrusherBufferSize, 2, 2);
+                    let phaserL = 0, phaserR = 0;
+                    let lastL = 0, lastR = 0;
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const bits = parseInt(document.getElementById('bitcrusherBitsSlider').value);
+                        const normfreq = parseFloat(document.getElementById('bitcrusherNormfreqSlider').value);
+                        const step = Math.pow(1 / 2, bits);
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            phaserL += normfreq;
+                            phaserR += normfreq;
+                            if (phaserL >= 1.0) {
+                                phaserL -= 1.0;
+                                lastL = step * Math.floor(inputL[i] / step + 0.5);
+                            }
+                            if (phaserR >= 1.0) {
+                                phaserR -= 1.0;
+                                lastR = step * Math.floor(inputR[i] / step + 0.5);
+                            }
+                            outputL[i] = lastL;
+                            outputR[i] = lastR;
+                        }
+                    };
+                    break;
+                case 'RC':
+                    const RCBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(RCBufferSize, 2, 2);
+                    let lastOutputL = 0, lastOutputR = 0;
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const dt = 1 / offlineContext.sampleRate;
+                        const RC = 1 / (2 * Math.PI * parseFloat(document.getElementById('frequencySlider').value));
+                        const alpha = dt / (RC + dt);
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            outputL[i] = alpha * inputL[i] + (1 - alpha) * lastOutputL;
+                            lastOutputL = outputL[i];
+
+                            outputR[i] = alpha * inputR[i] + (1 - alpha) * lastOutputR;
+                            lastOutputR = outputR[i];
+                        }
+                    };
+                    break;
+                case 'ringmod':
+                    const ringmodBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(ringmodBufferSize, 2, 2);
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const frequency = parseFloat(document.getElementById('ringmodFrequencySlider').value);
+                        const depth = parseFloat(document.getElementById('ringmodDepthSlider').value);
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            const t = i / offlineContext.sampleRate;
+                            const modulator = Math.sin(2 * Math.PI * frequency * t) * depth;
+                            outputL[i] = inputL[i] * modulator;
+                            outputR[i] = inputR[i] * modulator;
+                        }
+                    };
+                    break;
+                case 'vibrato':
+                    const vibratoBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(vibratoBufferSize, 2, 2);
+                    let vibratoPhase = 0;
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const frequency = parseFloat(document.getElementById('vibratoRateSlider').value);
+                        const depth = parseFloat(document.getElementById('vibratoDepthSlider').value) / 1200;
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            const lfo = Math.sin(2 * Math.PI * frequency * vibratoPhase);
+                            vibratoPhase += 1 / offlineContext.sampleRate;
+                            if (vibratoPhase > 1) vibratoPhase -= 1;
+
+                            const speedFactor = Math.pow(2, lfo * depth);
+                            const playbackRate = 1 + (speedFactor - 1) * depth;
+
+                            outputL[i] = inputL[Math.floor(i / playbackRate) % inputL.length];
+                            outputR[i] = inputR[Math.floor(i / playbackRate) % inputR.length];
+                        }
+                    };
+                    break;
+                case 'pitch':
+                    const pitchQuality = Math.min(14, Math.max(8, parseFloat(document.getElementById('pitchShiftQualitySlider').value)));
+                    const pitchBufferSize = Math.pow(2, Math.floor(pitchQuality));
+                    newFilter = offlineContext.createScriptProcessor(pitchBufferSize, 2, 2);
+                    let pitchBufferL = new Float32Array(pitchBufferSize);
+                    let pitchBufferR = new Float32Array(pitchBufferSize);
+                    let pitchBufferIndex = 0;
+
+                    newFilter.onaudioprocess = function (e) {
+                        const inputL = e.inputBuffer.getChannelData(0);
+                        const inputR = e.inputBuffer.getChannelData(1);
+                        const outputL = e.outputBuffer.getChannelData(0);
+                        const outputR = e.outputBuffer.getChannelData(1);
+                        const pitchShift = parseFloat(document.getElementById('pitchShiftSlider').value);
+
+                        for (let i = 0; i < e.inputBuffer.length; i++) {
+                            const readPos = pitchBufferIndex * Math.pow(2, pitchShift / 12);
+                            const wrappedReadPos = (readPos + pitchBufferSize) % pitchBufferSize;
+
+                            const readIndex = Math.floor(wrappedReadPos);
+                            const nextIndex = (readIndex + 1) % pitchBufferSize;
+                            const fraction = wrappedReadPos - readIndex;
+                            const firstL = pitchBufferL[readIndex];
+                            const secondL = pitchBufferL[nextIndex];
+                            const firstR = pitchBufferR[readIndex];
+                            const secondR = pitchBufferR[nextIndex];
+
+                            const interpolatedL = firstL + fraction * (secondL - firstL);
+                            const interpolatedR = firstR + fraction * (secondR - firstR);
+
+                            pitchBufferL[pitchBufferIndex] = inputL[i];
+                            pitchBufferR[pitchBufferIndex] = inputR[i];
+                            pitchBufferIndex = (pitchBufferIndex + 1) % pitchBufferSize;
+
+                            outputL[i] = interpolatedL;
+                            outputR[i] = interpolatedR;
+                        }
+                    };
+                    break;
+                case 'nonlinearFilter':
+                    const nonlinearBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(nonlinearBufferSize, 2, 2);
+                    // Add nonlinear filter processing logic here if needed
+                    break;
+                case 'phaser':
+                    const PhaserBufferSize = 4096;
+                    newFilter = offlineContext.createScriptProcessor(PhaserBufferSize, 2, 2);
+                    // Add phaser processing logic here if needed
+                    break;
+                default:
+                    newFilter = offlineContext.createBiquadFilter();
+                    newFilter.type = filterType;
+                    newFilter.frequency.value = parseFloat(document.getElementById('frequencySlider').value);
+                    newFilter.Q.value = parseFloat(document.getElementById('resonanceSlider').value);
+            }
+
+            const gainNode = offlineContext.createGain();
+            gainNode.gain.value = 1;
+
+            // Create a silent buffer for the offset
+            const silentBuffer = offlineContext.createBuffer(
+                audioBuffer.numberOfChannels,
+                offsetSamples,
+                audioBuffer.sampleRate
+            );
+
+            // Connect the silent buffer and the audio source
+            const silentSource = offlineContext.createBufferSource();
+            silentSource.buffer = silentBuffer;
+
+            silentSource.connect(newFilter);
+            source.connect(newFilter);
+            newFilter.connect(gainNode);
+            gainNode.connect(offlineContext.destination);
+
+            // Start the silent buffer and the audio source
+            silentSource.start(0);
+            source.start(saveOffset);
+
+            return offlineContext.startRendering();
+        }
+
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1;
+            const bitDepth = 16;
+
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+
+            const dataLength = buffer.length * numChannels * bytesPerSample;
+            const wavLength = 44 + dataLength;
+
+            const wav = new ArrayBuffer(wavLength);
+            const view = new DataView(wav);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, wavLength - 8, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataLength, true);
+
+            const offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numChannels; channel++) {
+                    const sample = m.max(-1, m.min(1, buffer.getChannelData(channel)[i]));
+                    const index = offset + (i * numChannels + channel) * bytesPerSample;
+                    if (index + 2 <= wav.byteLength) {
+                        view.setInt16(index, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    }
+                }
+            }
+
+            return new Uint8Array(wav);
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        document.getElementById('saveAudio').addEventListener('click', async () => {
+            if (!audioBuffer) {
+                alert('Please load an audio file first.');
+                return;
+            }
+
+            const processedBuffer = await processAudio();
+            const wav = audioBufferToWav(processedBuffer);
+            const blob = new Blob([wav], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'processed_audio.wav';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1;
+            const bitDepth = 16;
+
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+
+            const dataLength = buffer.length * numChannels * bytesPerSample;
+            const wavLength = 44 + dataLength;
+
+            const wav = new ArrayBuffer(wavLength);
+            const view = new DataView(wav);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, wavLength - 8, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataLength, true);
+
+            const offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numChannels; channel++) {
+                    const sample = m.max(-1, m.min(1, buffer.getChannelData(channel)[i]));
+                    const index = offset + (i * numChannels + channel) * bytesPerSample;
+                    if (index + 2 <= wav.byteLength) {
+                        view.setInt16(index, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    }
+                }
+            }
+
+            return new Uint8Array(wav);
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+        </script>
+    </body>
+</html>
+  </html>
