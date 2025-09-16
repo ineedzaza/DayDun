@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fractal HTML Example — Mandelbrot / Newton / Secant</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:12px;background:#0b0c10;color:#e6eef6}
+    .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;max-width:1100px;margin-bottom:12px}
+    label{display:block;font-size:12px;color:#a9b3c7}
+    select,input,button{width:100%;padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit}
+    canvas{background:#000;display:block;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,0.6);max-width:100%}
+    .row{display:flex;gap:8px}
+    .note{font-size:12px;color:#9aa6bf;margin-top:8px}
+    .palette-swatch{height:28px;border-radius:6px;border:1px solid rgba(255,255,255,0.04)}
+  </style>
+</head>
+<body>
+  <h1>Fractal HTML Example — Mandelbrot / Newton / Secant</h1>
+  <p class="note">Choose fractal type, palette (1–10 presets), iteration count and zoom (0–179). Type non-numeric zoom (eg. "uncentillion") to jump to the maximum supported zoom (179).</p>
+
+  <div class="controls">
+    <div>
+      <label>Fractal type</label>
+      <select id="fractalType">
+        <option value="mandelbrot">Mandelbrot</option>
+        <option value="newton">Newton (z^3 - 1)</option>
+        <option value="secant">Secant (root-find z^3 - 1)</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Palette (1–10)</label>
+      <select id="palette">
+        <option value="0">Palette 1</option>
+        <option value="1">Palette 2</option>
+        <option value="2">Palette 3</option>
+        <option value="3">Palette 4</option>
+        <option value="4">Palette 5</option>
+        <option value="5">Palette 6</option>
+        <option value="6">Palette 7</option>
+        <option value="7">Palette 8</option>
+        <option value="8">Palette 9</option>
+        <option value="9">Palette 10</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Iterations</label>
+      <input id="iterations" type="number" min="10" max="2000" value="500" />
+    </div>
+
+    <div>
+      <label>Zoom (0–179 or name like "uncentillion")</label>
+      <input id="zoomInput" type="text" value="0" />
+    </div>
+
+    <div>
+      <label>Center (re, im)</label>
+      <div class="row">
+        <input id="centerRe" placeholder="-0.5" value="-0.5" />
+        <input id="centerIm" placeholder="0" value="0" />
+      </div>
+    </div>
+
+    <div>
+      <label>Canvas size (px)</label>
+      <div class="row">
+        <input id="width" type="number" value="900" />
+        <input id="height" type="number" value="600" />
+      </div>
+    </div>
+
+    <div>
+      <label>Render</label>
+      <button id="renderBtn">Render</button>
+    </div>
+
+    <div>
+      <label>Download</label>
+      <button id="downloadBtn">Download PNG</button>
+    </div>
+
+    <div>
+      <label>Quick actions</label>
+      <div class="row">
+        <button id="zoomIn">Zoom In (click)</button>
+        <button id="zoomOut">Zoom Out (click)</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <p class="note">Click on canvas to zoom to that point. Very large named zooms map to the maximum supported zoom (179). True arbitrary-precision deep-zoom requires big-number complex arithmetic and is beyond this small demo.</p>
+
+  <script>
+  // --- utilities ---
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  const presets = [
+    // 10 palettes: arrays of hex color stops
+    ['#0b0c10','#1b316b','#4b9bdc','#d6ecff','#fff8d6'],
+    ['#0b0c10','#003f2d','#0ab1a1','#e7fffb','#ffffd9'],
+    ['#0b0c10','#2d001f','#7b1fa2','#d57be8','#ffe9ff'],
+    ['#000409','#001f54','#00a9f4','#a6efff','#fff0b5'],
+    ['#09121a','#123b2a','#3ea66e','#c9ffd6','#fffbe6'],
+    ['#020204','#201040','#6a00a8','#d080ff','#fff0f8'],
+    ['#000000','#0b3d91','#1fb6ff','#7ff0ff','#ffffff'],
+    ['#0b0c10','#2b1a00','#7b3a00','#ffa84d','#fff1d0'],
+    ['#000004','#2b0b4a','#7b12b8','#ff9ae6','#ffffff'],
+    ['#001010','#007070','#00cfcf','#bfffff','#ffffff']
+  ];
+
+  function makeGradient(palette, n){
+    // simple linear interpolation between stops to make n colors
+    const stops = palette.map(hexToRgb);
+    const out = [];
+    for(let i=0;i<n;i++){
+      const t = i/(n-1);
+      const idx = t*(stops.length-1);
+      const i0 = Math.floor(idx), i1 = Math.min(stops.length-1, i0+1);
+      const localT = idx - i0;
+      const c = lerpColor(stops[i0], stops[i1], localT);
+      out.push(rgbToHex(Math.round(c[0]),Math.round(c[1]),Math.round(c[2])));
+    }
+    return out;
+  }
+
+  function hexToRgb(hex){
+    const h = hex.replace('#','');
+    return [parseInt(h.substring(0,2),16),parseInt(h.substring(2,4),16),parseInt(h.substring(4,6),16)];
+  }
+  function rgbToHex(r,g,b){return '#'+((1<<24)+(r<<16)|(g<<8)|b).toString(16).slice(1)}
+  function lerp(a,b,t){return a+(b-a)*t}
+  function lerpColor(a,b,t){return [lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)]}
+
+  // --- complex helpers ---
+  function mandelbrot(c_re,c_im,maxIter){
+    let z_re = 0, z_im = 0;
+    let i = 0;
+    for(; i<maxIter; ++i){
+      // z = z^2 + c
+      const re2 = z_re*z_re - z_im*z_im + c_re;
+      const im2 = 2*z_re*z_im + c_im;
+      z_re = re2; z_im = im2;
+      if(z_re*z_re + z_im*z_im > 4) break;
+    }
+    if(i===maxIter) return maxIter;
+    // smooth coloring
+    const mag = Math.sqrt(z_re*z_re + z_im*z_im);
+    const nu = i + 1 - Math.log(Math.log(mag))/Math.log(2);
+    return nu;
+  }
+
+  function newton(z_re,z_im,maxIter){
+    // Newton for f(z)=z^3-1
+    let x = {re:z_re,im:z_im};
+    const tol = 1e-6;
+    for(let i=0;i<maxIter;i++){
+      // compute f = z^3 - 1
+      const a = x.re, b = x.im;
+      // z^2 = (a^2 - b^2) + 2ab i
+      const re2 = a*a - b*b;
+      const im2 = 2*a*b;
+      // z^3 = z^2 * z
+      const re3 = re2*a - im2*b;
+      const im3 = re2*b + im2*a;
+      const f_re = re3 - 1;
+      const f_im = im3;
+      // f' = 3 z^2
+      const fp_re = 3*re2;
+      const fp_im = 3*im2;
+      // Newton: z = z - f / f'
+      const denom = fp_re*fp_re + fp_im*fp_im;
+      if(denom === 0) break;
+      const div_re = (f_re*fp_re + f_im*fp_im)/denom;
+      const div_im = (f_im*fp_re - f_re*fp_im)/denom;
+      x.re = x.re - div_re;
+      x.im = x.im - div_im;
+      const dist2 = (f_re*f_re + f_im*f_im);
+      if(dist2 < tol*tol) return i;
+    }
+    return maxIter;
+  }
+
+  function secantIter(z_re,z_im,prev_re,prev_im,maxIter){
+    // Secant method applied to f(z)=z^3-1, start with z_n and z_{n-1}
+    let zn = {re:z_re,im:z_im};
+    let zn1 = {re:prev_re,im:prev_im};
+    for(let i=0;i<maxIter;i++){
+      // f(zn), f(zn1)
+      const fzn = cubicF(zn);
+      const fzn1 = cubicF(zn1);
+      const denom = (fzn.re*fzn1.re + fzn.im*fzn1.im) - (fzn.re*fzn1.re + fzn.im*fzn1.im); // dummy to avoid lint
+      // compute complex secant step: zn+1 = zn - f(zn)*(zn - zn1)/(f(zn) - f(zn1))
+      const diffZ = {re:zn.re - zn1.re, im:zn.im - zn1.im};
+      const diffF = {re:fzn.re - fzn1.re, im:fzn.im - fzn1.im};
+      const denomF = diffF.re*diffF.re + diffF.im*diffF.im;
+      if(denomF === 0) break;
+      // multiply f(zn) * diffZ
+      const num_re = fzn.re*diffZ.re - fzn.im*diffZ.im;
+      const num_im = fzn.re*diffZ.im + fzn.im*diffZ.re;
+      const step_re = (num_re*diffF.re + num_im*diffF.im)/denomF;
+      const step_im = (num_im*diffF.re - num_re*diffF.im)/denomF;
+      const next = {re: zn.re - step_re, im: zn.im - step_im};
+      zn1 = zn; zn = next;
+      if(Math.hypot(fzn.re,fzn.im) < 1e-6) return i;
+    }
+    return maxIter;
+  }
+
+  function cubicF(z){
+    const a=z.re,b=z.im;
+    const re2 = a*a - b*b; const im2 = 2*a*b;
+    const re3 = re2*a - im2*b; const im3 = re2*b + im2*a;
+    return {re: re3 - 1, im: im3};
+  }
+
+  // --- rendering ---
+  function render(){
+    const type = document.getElementById('fractalType').value;
+    const paletteIdx = parseInt(document.getElementById('palette').value,10) || 0;
+    const maxIter = parseInt(document.getElementById('iterations').value,10) || 500;
+    const zoomRaw = document.getElementById('zoomInput').value.trim();
+    const w = parseInt(document.getElementById('width').value,10) || 900;
+    const h = parseInt(document.getElementById('height').value,10) || 600;
+
+    // canvas size
+    canvas.width = w; canvas.height = h;
+
+    // parse zoom: allow numeric 0-179; non-numeric => max 179
+    let zoom = 0;
+    if(/^-?\d+$/.test(zoomRaw)){
+      zoom = Math.max(0, Math.min(179, parseInt(zoomRaw,10)));
+    } else {
+      // named huge zooms map to maximum supported (179)
+      zoom = 179;
+    }
+
+    // scale: how many units in complex plane per canvas width
+    // base scale for zoom=0 is 3.5 (typical for Mandelbrot), each zoom doubles magnification
+    const baseWidth = 3.5;
+    const scale = baseWidth / Math.pow(2, zoom); // scale in complex units per canvas width
+
+    const centerRe = parseFloat(document.getElementById('centerRe').value) || -0.5;
+    const centerIm = parseFloat(document.getElementById('centerIm').value) || 0;
+
+    const pixelWidth = scale / w; // complex unit per pixel
+
+    // palette
+    const palette = makeGradient(presets[paletteIdx], 1024);
+
+    const img = ctx.createImageData(w,h);
+    const data = img.data;
+
+    for(let py=0; py<h; ++py){
+      const im = centerIm + (py - h/2) * pixelWidth;
+      for(let px=0; px<w; ++px){
+        const re = centerRe + (px - w/2) * pixelWidth;
+        let value;
+        if(type === 'mandelbrot'){
+          value = mandelbrot(re,im,maxIter);
+        } else if(type === 'newton'){
+          const it = newton(re,im, maxIter);
+          value = it === maxIter ? maxIter : it;
+        } else { // secant
+          // start previous point slightly offset
+          const prev_re = re + 0.001; const prev_im = im + 0.001;
+          const it = secantIter(re,im,prev_re,prev_im,maxIter);
+          value = it;
+        }
+        // map value to color
+        const t = Math.min(1, value / maxIter);
+        const colorIdx = Math.floor(t * (palette.length-1));
+        const hex = palette[colorIdx];
+        const rgb = hexToRgb(hex);
+        const idx = (py*w + px)*4;
+        data[idx] = rgb[0]; data[idx+1] = rgb[1]; data[idx+2] = rgb[2]; data[idx+3] = 255;
+      }
+    }
+
+    ctx.putImageData(img,0,0);
+  }
+
+  // UI wiring
+  document.getElementById('renderBtn').addEventListener('click', render);
+  document.getElementById('downloadBtn').addEventListener('click', ()=>{
+    const link = document.createElement('a');
+    link.download = 'fractal.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+  document.getElementById('zoomIn').addEventListener('click', ()=>{
+    const z = parseInt(document.getElementById('zoomInput').value)||0;
+    document.getElementById('zoomInput').value = Math.min(179, z+1);
+    render();
+  });
+  document.getElementById('zoomOut').addEventListener('click', ()=>{
+    const z = parseInt(document.getElementById('zoomInput').value)||0;
+    document.getElementById('zoomInput').value = Math.max(0, z-1);
+    render();
+  });
+
+  // click to recenter & zoom
+  canvas.addEventListener('click', (ev)=>{
+    const rect = canvas.getBoundingClientRect();
+    const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
+    const w = canvas.width, h = canvas.height;
+    const zoom = parseInt(document.getElementById('zoomInput').value) || 0;
+    const scale = 3.5 / Math.pow(2, zoom);
+    const pixelWidth = scale / w;
+    const cx = parseFloat(document.getElementById('centerRe').value) || -0.5;
+    const cy = parseFloat(document.getElementById('centerIm').value) || 0;
+    const newRe = cx + (x - w/2) * pixelWidth;
+    const newIm = cy + (y - h/2) * pixelWidth;
+    document.getElementById('centerRe').value = newRe.toPrecision(12);
+    document.getElementById('centerIm').value = newIm.toPrecision(12);
+    // bump zoom by 1 to zoom in
+    const zVal = parseInt(document.getElementById('zoomInput').value) || 0;
+    document.getElementById('zoomInput').value = Math.min(179, zVal+1);
+    render();
+  });
+
+  // initial render
+  render();
+  </script>
+</body>
+</html>
