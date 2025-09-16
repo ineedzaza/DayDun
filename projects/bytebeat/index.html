@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bytebeat shit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: black;
+            color:white;
+        }
+        #formula {
+            width: 100%;
+            height: 100px;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+        button, input, select {
+            margin-top: 10px;
+        }
+        #ttx {
+            color: #ff0000;
+            font-size: 12px;
+        }
+        #error-message {
+            color: #ff0000;
+            font-size: 12px;
+            margin-top: 5px;
+            transition: opacity 0.5s ease-out, color 0.3s ease-in-out;
+        }
+        /*I coppied dolchan's colors lmao, because i like it and too iconic*/
+        .cm-number { color: #ff50ff !important; }
+        .cm-operator { color: #96cbfe !important; }
+        .cm-keyword { color: #b1b1ff !important; }
+        .cm-variable { color: #c5c8c6 !important; }
+        .cm-bracket, .cm-curly, .cm-paren { color: #96cbfe !important; }
+        .cm-string { color: #a8ff60 !important; }
+        .cm-string-2 { color: #56b6c2 !important; }
+        .cm-comment { color: #7d8799 !important; }
+        .cm-atom { color: #b1b1ff !important; }
+        .cm-def { color: #b1b1ff !important; }
+        .cm-property { color: #c5c8c6 !important; }
+        .cm-variable-2 { color: #c5c8c6 !important; }
+        .cm-variable-3 { color: #c5c8c6 !important; }
+        .cm-builtin { color: #00ffff !important; }
+        .cm-meta { color: #b1b1ff !important; }
+        .CodeMirror {
+            background-color: black !important;
+            color: #c5c8c6 !important;
+            font-weight: bold;
+            border: 1px solid #0000ff;
+            word-wrap: break-word !important;
+            white-space: pre-wrap !important;
+        }
+        .CodeMirror-cursor { border-left: 1px solid #c5c8c6 !important; }
+        .CodeMirror-selected { background: #214283 !important; }
+        .CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection { background: #214283 !important; }
+        .CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection { background: #214283 !important; }
+        #oscilloscope {
+            width: 100%;
+            height: 200px;
+            background-color: black;
+            margin-top: 20px;
+            border: 1px solid #FF0000;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .controls label, .controls input, .controls select {
+            margin: 0;
+        }
+        .controls input[type="number"], .controls input[type="text"] {
+            width: 60px;
+        }
+        .controls button {
+            margin-top: 2.1px;
+        }
+        #tValue {
+            width: 100px;
+        }
+        #playForward,#playReverse,#stop,#play {
+            width: 60px;
+        }
+        .frequency-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        #audioFile {
+            display: none;
+        }
+        #audioFileLabel {
+            padding: 5px 10px;
+            background: #333;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            font-size: 12px;
+        }
+        #audioFileLabel:hover {
+            background: #444;
+        }
+        button {
+            background-color: #000050;
+            color: #fff;
+            border: 1.5px solid #000030;
+            border-radius: 4px;
+            padding: 4.5px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        button:hover, button:focus {
+            background-color: #0000FF;
+            color: #fff;
+            border-color: #008;
+            outline: none;
+        }
+        input[list] {
+            background-color: #222;
+            color: #fff;
+            border: 1.5px solid #111;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input[list]:focus {
+            border-color: #111;
+            background-color: #222;
+        }
+        datalist option {
+            background: #222;
+            color: #fff;
+
+            font-size: 12px;
+        }
+        input[type="number"] {
+            background-color: #222;
+            color: #fff;
+            border: 1.5px solid #111;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input[type="number"]:focus {
+            border-color: #111;
+            background-color: #222;
+        }
+        input[type="text"] {
+            background-color: #222;
+            color: #fff;
+            border: 1.5px solid #111;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input[type="number"]:focus {
+            border-color: #111;
+            background-color: #222;
+        }
+        select {
+            background-color: #222;
+            color: #fff;
+            border: 1.5px solid #111;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+
+            font-weight: bold;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        #copyDolchan{
+            background-color: #222;
+            color: #fff;
+            border: 1.5px solid #111;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        #copyDolchan:hover, #copyDolchan:focus {
+            background-color: #444;
+            color: #fff;
+            border-color: #222;
+            outline: none;
+        }
+        #copyEnBeat{
+            background-color: #040;
+            color: #fff;
+            border: 1.5px solid #020;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        #copyEnBeat:hover, #copyEnBeat:focus {
+            background-color: #080;
+            color: #fff;
+            border-color: #040;
+            outline: none;
+        }
+        #clearAudio{
+            background-color: #400;
+            color: #fff;
+            border: 1.5px solid #200;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        #clearAudio:hover, #clearAudio:focus {
+            background-color: #800;
+            color: #fff;
+            border-color: #400;
+            outline: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+</head>
+<body>
+    <br>
+    <textarea id="formula"></textarea>
+    <div id="error-message"></div>
+    <br>
+    <div id="ttx">STILL IN DEVELOPMENT</div>
+    <div class="controls">
+        <input type="number" id="tValue" min="0" step="1" value="0">
+        <button id="playReverse">&lt;</button>
+        <button id="stop">Stop</button>
+        <button id="play">Play</button>
+        <button id="playForward">&gt;</button>
+        <label for="tValue">t:</label>
+        <label for="frequency">Frequency (Hz):</label>
+        <input id="frequency" class="keepDatalist" min="0" step="1" value="32000" list="frequency-options" style="width: 100px" placeholder="32000" valuetemp="32000" onfocus="InputDropList_Focus('frequency')" onfocusout="InputDropList_FocusOut('frequency')" onchange="InputDropList_OnChange('frequency', DoSmthOnChange('frequency'))">
+        <datalist id="frequency-options">
+            <option value="1000">1000 Hz</option>
+            <option value="8000">8000 Hz</option>
+            <option value="11025">11025 Hz</option>
+            <option value="22050">22050 Hz</option>
+            <option value="32000">32000 Hz</option>
+            <option value="44100">44100 Hz</option>
+            <option value="48000">48000 Hz</option>
+        </datalist>
+    </div>
+    <div class="controls">
+        <label for="beatType">Beat Type:</label>
+        <select id="beatType">
+            <option value="bytebeat">ByteBeat</option>
+            <option value="signed_bytebeat">Signed</option>
+            <option value="floatbeat">FloatBeat</option>
+            <option value="funcbeat">FuncBeat</option>
+        </select>
+        <label for="saveLength">Save Length:</label>
+        <input type="text" id="saveLength" value="2**20" placeholder="Enter math or value">
+        <button id="save">Save</button>
+        <input type="file" id="audioFile" accept="audio/*">
+        <label id="audioFileLabel" for="audioFile">Load Audio</label>
+        <button id="clearAudio">Clear</button>
+        <label for="loop">Loop?</label>
+        <input id="loop" type="checkbox" checked>
+        <button id="visualize_type">Scope</button>
+    </div>
+    <div class="controls">
+        <div id="ttx">note: this wont copy the type it will only copy the code</div>
+        <button id="copyDolchan">Copy (Dollchan)</button>
+        <button id="copyEnBeat">Copy (EnBeat)</button>
+    </div>
+    <canvas id="oscilloscope"></canvas>
+
+    <script>
+        let audioContext;
+        let scriptNode;
+        let isPlaying = false;
+        let sampleRate = 48000;
+        let playbackRate = 1;
+        let phase = 0;
+        let editor;
+        let lastValidFormula = null;
+        let errorTimeout;
+        let oscilloscopeCanvas;
+        let oscilloscopeCtx;
+        let oscilloscopeDataL = new Float32Array(1024);
+        let oscilloscopeDataR = new Float32Array(1024);
+        let beatType = 'bytebeat';
+        let lastT = 0;
+        let variableStore = {};
+        let playDirection = 1;
+        let speedMultiplier = 1;
+        let smoothT = 0; // Smoothed t value
+        let smoothingFactor = 0.003; // Smoothing amount (0-1)
+        let audioBuffer = null;
+        let audioBufferData = null;
+        let audioBufferLength = 0;
+        let isPaused = false;
+        let pausePosition = 0;
+
+        let audioBufferDataL = null;
+        let audioBufferDataR = null;
+
+        // Math functions
+        const {
+            abs, acos, acosh, asin, asinh, atan, atan2, atanh, cbrt, ceil, clz32, cos, cosh, exp, expm1, floor, fround, hypot, imul, log, log10, log1p, log2, max, min, pow, random, round, sign, sin, sinh, sqrt, tan, tanh, trunc
+        } = Math
+        // Math constants
+        const {
+            PI, E, LN2, LN10, LOG2E, LOG10E, SQRT1_2, SQRT2
+        } = Math
+
+        // functions that aren't mine
+        const br=(u,BTc=8)=>{let result=0;for(let i=0;i<BTc;i++){result+=((u&(pow(2,BTc)>>i+1))?(1<<i):0);}return result;};
+        const sinf=(X)=>sin(X*PI/128);
+        const cosf=(X)=>cos(X*PI/128);
+        const tanf=(X)=>tan(X*PI/128);
+        const bitC=(X,Y,Z)=>X&Y?Z:0
+
+        const playForwardButton = document.getElementById('playForward');
+        const playReverseButton = document.getElementById('playReverse');
+        const stopButton = document.getElementById('stop');
+        const saveButton = document.getElementById('save');
+        const frequencyInput = document.getElementById('frequency');
+        const tValueInput = document.getElementById('tValue');
+        const saveLengthInput = document.getElementById('saveLength');
+        const errorMessage = document.getElementById('error-message');
+        const beatTypeSelect = document.getElementById('beatType');
+        const copyDolchanButton = document.getElementById('copyDolchan');
+        const copyEnBeatButton = document.getElementById('copyEnBeat');
+        const audioFileInput = document.getElementById('audioFile');
+        const audioFileLabel = document.getElementById('audioFileLabel');
+        const clearAudioButton = document.getElementById('clearAudio');
+        oscilloscopeCanvas = document.getElementById('oscilloscope');
+        oscilloscopeCtx = oscilloscopeCanvas.getContext('2d');
+        const playButton = document.getElementById('play');
+        const frequencySelect = document.getElementById('frequency-options');
+        let visualizationType = 'oscilloscope'; // Default to oscilloscope
+
+        function InputDropList_Focus(elementID)
+            {
+                const el=document.getElementById(elementID);
+                el.setAttribute("valuetemp", el.value);
+                el.value="";        
+            }
+
+        function InputDropList_FocusOut(elementID)
+            {       
+                const el=document.getElementById(elementID);
+            if(el.value !== el.getAttribute("valuetemp"))
+                    el.value=el.getAttribute("valuetemp");
+            }
+
+        function InputDropList_OnChange(elementID, action)
+            {       
+                const el=document.getElementById(elementID);
+                el.setAttribute("valuetemp", el.value);
+            
+            el.blur();   
+                
+                if(action != null)
+                    action();
+        }
+
+        function updateFrequency() {
+            sampleRate = parseInt(frequencyInput.value);
+            if (isPlaying) {
+                pauseAudio();
+                startAudio();
+            }
+            updateUrl();
+        }
+
+        frequencyInput.addEventListener('change', updateFrequency);
+
+        function resizeCanvas() {
+            const rect = oscilloscopeCanvas.getBoundingClientRect();
+            oscilloscopeCanvas.width = rect.width * window.devicePixelRatio;
+            oscilloscopeCanvas.height = rect.height * window.devicePixelRatio;
+            oscilloscopeCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        editor = CodeMirror.fromTextArea(document.getElementById('formula'), {
+            mode: 'javascript',
+            theme: 'colorforth',
+            lineNumbers: true,
+            autofocus: true,
+            lineWrapping: true
+        });
+
+        editor.on('change', function() {
+            updateUrl();
+        });
+
+        playForwardButton.addEventListener('click', () => {
+            if (isPlaying && playDirection === 1) {
+                speedMultiplier = min(speedMultiplier * 2, 64);
+            } else {
+                playDirection = 1;
+                if (isPaused) {
+                    resumeAudio();
+                } else {
+                    startAudio();
+                }
+            }
+            updatePlayButtonText(playDirection);
+        });
+
+        playReverseButton.addEventListener('click', () => {
+            if (isPlaying && playDirection === -1) {
+                speedMultiplier = min(speedMultiplier * 2, 64);
+            } else {
+                playDirection = -1;
+                if (isPaused) {
+                    resumeAudio();
+                } else {
+                    startAudio();
+                }
+            }
+            updatePlayButtonText(playDirection);
+        });
+
+        stopButton.addEventListener('click', () => {
+            stopAudio();
+            playButton.textContent = 'Play';
+        });
+
+        playButton.addEventListener('click', () => {
+            if (!isPlaying) {
+                playDirection = 1;
+                speedMultiplier = 1;
+                startAudio();
+                playButton.textContent = 'Pause';
+            } else if (isPaused) {
+                resumeAudio();
+                playButton.textContent = 'Pause';
+            } else {
+                pauseAudio();
+                playButton.textContent = 'Play';
+            }
+        });
+
+        saveButton.addEventListener('click', saveAudio);
+        tValueInput.addEventListener('change', updateTValue);
+        beatTypeSelect.addEventListener('change', updateBeatType);
+        copyDolchanButton.addEventListener('click', copyForDolchan);
+        copyEnBeatButton.addEventListener('click', copyForEnBeat);
+        saveLengthInput.addEventListener('change', updateUrl);
+
+        const types = ['oscilloscope', 'spectrum', 'spectrumLog'];
+        let currentTypeIndex = 0;
+
+        document.getElementById('visualize_type').addEventListener('click', () => {
+            currentTypeIndex = (currentTypeIndex + 1) % types.length;
+            visualizationType = types[currentTypeIndex];
+            document.getElementById('visualize_type').textContent = visualizationType === 'oscilloscope' ? 'Scope' : visualizationType === 'spectrum' ? 'Spectrum' : 'Spectrum Log';
+        });
+
+        clearAudioButton.addEventListener('click', () => {
+            audioBuffer = null;
+            audioBufferData = null;
+            audioBufferDataL = null;
+            audioBufferDataR = null;
+            audioBufferLength = 0;
+            audioFileLabel.textContent = 'Load Audio';
+            audioFileInput.value = '';
+            updateUrl();
+        });
+
+        audioFileInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const arrayBuffer = e.target.result;
+
+                // FIX: Ensure audioContext is initialized
+                if (audioBuffer && audioBufferDataL && audioBufferDataR) {
+                    for (let i = 0; i < outputL.length; i++) {
+                        let t = Math.floor(phase);
+
+                        // Silence if out of range and not looping
+                        if (t >= audioBufferLength || t < 0) {
+                            outputL[i] = 0;
+                            outputR[i] = 0;
+                        } else {
+                            outputL[i] = audioBufferDataL[t];
+                            outputR[i] = audioBufferDataR[t];
+                        }
+                        // For oscilloscope visualization
+                        const oscIndex = t & 1023;
+                        oscilloscopeDataL[oscIndex] = outputL[i] * 0.5 + 0.5;
+                        oscilloscopeDataR[oscIndex] = outputR[i] * 0.5 + 0.5;
+                        phase += playDirection * speedMultiplier;
+                    }
+                    // Wrap phase after processing the buffer if looping is enabled
+                    if (document.getElementById('loop').checked) {
+                        // Always keep phase in [0, audioBufferLength)
+                        phase = ((phase % audioBufferLength) + audioBufferLength) % audioBufferLength;
+                    }
+                    return;
+                }
+
+                audioContext.decodeAudioData(arrayBuffer)
+                    .then(buffer => {
+                        audioBuffer = buffer;
+                        audioBufferLength = buffer.length;
+
+                        // Check channel count
+                        if (buffer.numberOfChannels === 1) {
+                            // Mono: copy the same data to both L and R
+                            audioBufferDataL = new Float32Array(buffer.length);
+                            buffer.copyFromChannel(audioBufferDataL, 0);
+                            audioBufferDataR = audioBufferDataL; // Both point to the same data
+                        } else {
+                            // Stereo: extract both channels
+                            audioBufferDataL = new Float32Array(buffer.length);
+                            audioBufferDataR = new Float32Array(buffer.length);
+                            buffer.copyFromChannel(audioBufferDataL, 0);
+                            buffer.copyFromChannel(audioBufferDataR, 1);
+                        }
+
+                        audioFileLabel.textContent = file.name;
+                        updateUrl();
+                    })
+                    .catch(error => {
+                        showError('Error loading audio: ' + error.message);
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function togglePlay(direction) {
+            if (!isPlaying) {
+                playDirection = direction;
+                speedMultiplier = 1;
+                startAudio();
+            } else if (playDirection === direction) {
+                speedMultiplier = min(speedMultiplier * 2, 64);
+            } else {
+                playDirection = direction;
+                speedMultiplier = 1;
+            }
+            updatePlayButtonText(direction);
+        }
+
+        function updatePlayButtonText(direction) {
+            if (direction === 1) {
+                playForwardButton.textContent = speedMultiplier > 1 ? `${speedMultiplier}>` : '>';
+                playReverseButton.textContent = '<';
+            } else {
+                playForwardButton.textContent = '>';
+                playReverseButton.textContent = speedMultiplier > 1 ? `<${speedMultiplier}` : '<';
+            }
+        }
+
+        function startAudio() {
+            if (isPlaying) return;
+
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
+            }
+            scriptNode = audioContext.createScriptProcessor(1024, 1, 2);
+
+            setupAnalyser(); // Initialize the analyser node
+
+            scriptNode.onaudioprocess = audioProcess;
+            scriptNode.connect(audioContext.destination);
+
+            isPlaying = true;
+            isPaused = false;
+            clearError();
+            updateUrl();
+        }
+
+        function playAudioBuffer() {
+            if (!audioBuffer) return;
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.loop = document.getElementById('loop').checked;
+
+            // Create a gain node if you want volume control (optional)
+            // const gainNode = audioContext.createGain();
+            // gainNode.gain.value = 1;
+
+            // Connect to analyserNode for visualization
+            setupAnalyser(); // Ensure analyserNode is set up
+
+            // Connect the chain: source -> analyserNode -> destination
+            source.connect(analyserNode);
+            analyserNode.connect(audioContext.destination);
+
+            source.start();
+
+            // Optionally, store the source so you can stop it later
+            window.currentAudioSource = source;
+        }
+        
+        function pauseAudio() {
+            if (!isPlaying) return;
+
+            pausePosition = phase;
+            scriptNode.disconnect();
+            isPlaying = false;
+            isPaused = true;
+            speedMultiplier = 1;
+            updatePlayButtonText(playDirection);
+        }
+
+        function resumeAudio() {
+            if (!isPaused) return;
+            
+            scriptNode = audioContext.createScriptProcessor(4096, 1, 2);
+            scriptNode.onaudioprocess = audioProcess;
+            scriptNode.connect(audioContext.destination);
+            
+            isPlaying = true;
+            isPaused = false;
+        }
+
+        function stopAudio() {
+            if (!isPlaying && !isPaused) return;
+
+            if (scriptNode) {
+                scriptNode.disconnect();
+            }
+            isPlaying = false;
+            isPaused = false;
+            phase = 0;
+            pausePosition = 0;
+            smoothT = 0;
+            tValueInput.value = 0;
+            speedMultiplier = 1;
+            clearOscilloscope();
+            updatePlayButtonText(playDirection);
+            playButton.textContent = 'Play';
+        }
+
+        function clearOscilloscope() {
+            oscilloscopeDataL.fill(0);
+            oscilloscopeDataR.fill(0);
+            drawOscilloscope();
+        }
+
+        function updateTValue() {
+            phase = parseInt(tValueInput.value);
+            smoothT = phase;
+            pausePosition = phase;
+        }
+
+        function updateBeatType() {
+            beatType = beatTypeSelect.value;
+            updateUrl();
+        }
+
+        function DoSmthOnChange(elementID) {
+            const el = document.getElementById(elementID);
+        }
+
+                        let lastFuncbeatCode = null;
+                let userFunc = null;
+
+
+        function audioProcess(e) {
+            const outputL = e.outputBuffer.getChannelData(0);
+            const outputR = e.outputBuffer.getChannelData(1);
+            let formula;
+            let isFuncBeat = (beatType === 'funcbeat');
+
+            try {
+
+                if (isFuncBeat) {
+                    let code = editor.getValue();
+                    if (lastFuncbeatCode !== code || !userFunc) {
+                        // Only re-evaluate if code changed
+                        let funcFactory = new Function(code);
+                        userFunc = funcFactory();
+                        if (typeof userFunc !== 'function') throw new Error('FuncBeat: code must return a function');
+                        lastFuncbeatCode = code;
+                        lastValidFormula = userFunc;
+                        clearError();
+                    }
+                }  else {
+                    formula = new Function('t', 'audio', 'wild', 'return ' + editor.getValue());
+                    lastValidFormula = formula;
+                    clearError();
+                }
+            } catch (error) {
+                showError('Bytebeat Error: ' + error.message);
+                if (isFuncBeat) {
+                    userFunc = lastValidFormula || ((t, S) => 0);
+                } else {
+                    formula = lastValidFormula || ((t) => [0, 0]);
+                }
+            }
+
+            const bufferSize = outputL.length;
+            const frequencyRatio = sampleRate / audioContext.sampleRate;
+
+            try {
+                for (let i = 0; i < bufferSize; i++) {
+                    const t = floor(phase * frequencyRatio);
+
+                    // Smooth t value
+                    smoothT += (t - smoothT) * smoothingFactor;
+                    const currentT = floor(smoothT);
+
+                    let valueL, valueR;
+
+                    if (isFuncBeat) {
+                        // For funcbeat, t is "time in seconds", S is sampleRate
+                        // User function may use any parameter names
+                        // Use audioBufferDataL and audioBufferDataR for stereo
+                        window.audio = [
+                            audioBufferDataL && t < audioBufferLength ? audioBufferDataL[t] : 0,
+                            audioBufferDataR && t < audioBufferLength ? audioBufferDataR[t] : 0
+                        ];
+                        let out;
+                        try {
+                            out = userFunc(t / sampleRate, sampleRate);
+                        } catch (error) {
+                            handleFormulaError(error);
+                            out = lastValidFormula ? lastValidFormula(t / sampleRate, sampleRate) : 0;
+                        }
+
+                    if (Array.isArray(out) && out.length === 2) {
+                        valueL = Math.max(-1, Math.min(1, out[0])) / 2;
+                        valueR = Math.max(-1, Math.min(1, out[1])) / 2;
+                    } else {
+                        valueL = valueR = Math.max(-1, Math.min(1, out)) / 2;
+                    }
+                    } else {
+                        let result;
+                        try {
+                            if (currentT !== lastT) {
+                                lastT = currentT;
+                                for (let key in variableStore) {
+                                    if (key.startsWith('this.')) {
+                                        variableStore[key] += 1;
+                                    }
+                                }
+                                variableStore.lastRandom = Math.random();
+                            }
+
+                            const handler = {
+                                get: function (target, prop) {
+                                    if (prop.startsWith('this.')) {
+                                        if (!(prop in target)) {
+                                            target[prop] = 0;
+                                        }
+                                        return target[prop];
+                                    }
+                                    return target[prop];
+                                },
+                                set: function (target, prop, value) {
+                                    if (prop.startsWith('this.')) {
+                                        target[prop] = value;
+                                    }
+                                    return true;
+                                }
+                            };
+
+                            const proxy = new Proxy(variableStore, handler);
+
+                            // Use audioBufferDataL and audioBufferDataR for stereo
+                            const audio = [
+                                audioBufferDataL && t < audioBufferLength ? audioBufferDataL[t] : 0,
+                                audioBufferDataR && t < audioBufferLength ? audioBufferDataR[t] : 0
+                            ];
+
+                            // Evaluate formula with 'wild' for channel index
+                            result = formula.call(proxy, t, audio, 0);
+                            if (editor.getValue().includes('wild')) {
+                                result = [
+                                    formula.call(proxy, t, audio, 0),
+                                    formula.call(proxy, t, audio, 1)
+                                ];
+                            }
+                        } catch (error) {
+                            handleFormulaError(error);
+                            result = lastValidFormula ? lastValidFormula(t) : [0, 0];
+                        }
+
+                        if (Array.isArray(result) && result.length === 2) {
+                            valueL = processValue(result[0]) / 2;
+                            valueR = processValue(result[1]) / 2;
+                        } else {
+                            valueL = valueR = processValue(result) / 2;
+                        }
+                    }
+
+                    outputL[i] = valueL;
+                    outputR[i] = valueR;
+
+                    const oscIndex = t / speedMultiplier & 1023;
+                    oscilloscopeDataL[oscIndex] = valueL + .5;
+                    oscilloscopeDataR[oscIndex] = valueR + .5;
+
+                    phase += playDirection * speedMultiplier;
+                }
+            } catch (error) {
+                showError('Bytebeat Error: ' + error.message);
+            }
+        }
+
+        function processValue(value) {
+            switch (beatType) {
+                case 'bytebeat':
+                    return (value & 255) / 128 - 1;
+                case 'signed_bytebeat':
+                    return ((value + 128) & 255) / 128 - 1;
+                case 'floatbeat':
+                    return Math.max(-1, Math.min(1, value));
+                case 'funcbeat':
+                    return Math.max(-1, Math.min(1, value));
+                default:
+                    return 0;
+            }
+        }
+        
+        let analyserNode;
+        let frequencyData;
+
+        function setupAnalyser() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            analyserNode = audioContext.createAnalyser();
+            analyserNode.fftSize = 2048; // Adjust for resolution
+            frequencyData = new Uint8Array(analyserNode.frequencyBinCount);
+            scriptNode.connect(analyserNode);
+            analyserNode.connect(audioContext.destination);
+        }
+
+        function drawSpectrum(isLog=false) {
+            const width = oscilloscopeCanvas.width / window.devicePixelRatio;
+            const height = oscilloscopeCanvas.height / window.devicePixelRatio;
+            const size = frequencyData.length
+
+            switch (isLog) {
+                case 0:
+                    oscilloscopeCtx.clearRect(0, 0, width, height);
+                    oscilloscopeCtx.fillStyle = '#000';
+                    oscilloscopeCtx.fillRect(0, 0, width, height);
+
+                    analyserNode.getByteFrequencyData(frequencyData);
+
+                    barWidth = width / size;
+                    for (let i = 0; i < size; i++) {
+                        const barHeight = (frequencyData[i] / 255) * height;
+                        barH=barHeight*1.26
+                        const B255 = (Math.min(barH, 255) / 255) ** 1.5 * 255;
+                        oscilloscopeCtx.fillStyle = `rgb(${Math.min(B255 * 2, 256)}, 0, ${Math.min((256 - B255) * 2, 256)})`;
+                        oscilloscopeCtx.fillRect(i * barWidth, height - barHeight, barWidth+1, barHeight);
+                    }
+                    break;
+                case 1:
+                    oscilloscopeCtx.clearRect(0, 0, width, height);
+                    oscilloscopeCtx.fillStyle = '#000';
+                    oscilloscopeCtx.fillRect(0, 0, width, height);
+
+                    analyserNode.getByteFrequencyData(frequencyData);
+                    //easier way to switch functions
+                    const func=Math.log
+
+                    // Logarithmic spectrum
+                    const logMin = 1;
+                    const logMax = func(size + 1);
+                    for (let i = 0; i < size; i++) {
+                        const barHeight = (frequencyData[i] / 255) * height;
+                        const x = (func(i + logMin) / logMax) * width;
+                        // Calculate bar width so bars fill the canvas with no gaps
+                        const nextX = (func(i + 1 + logMin) / logMax) * width;
+                        const barWidth = nextX - x + 1;
+                        barH=barHeight*1.26
+                        const B255 = (Math.min(barH, 255) / 255) ** 1.5 * 255;
+                        oscilloscopeCtx.fillStyle = `rgb(${Math.min(B255 * 2, 256)}, 0, ${Math.min((256 - B255) * 2, 256)})`;
+                        oscilloscopeCtx.fillRect(x, height - barHeight, barWidth, barHeight);
+                    }
+                    break;
+            }
+        }
+
+        function drawScope() {
+            const width = oscilloscopeCanvas.width / window.devicePixelRatio;
+            const height = oscilloscopeCanvas.height / window.devicePixelRatio;
+
+            oscilloscopeCtx.clearRect(0, 0, width, height);
+            oscilloscopeCtx.fillStyle = '#000';
+            oscilloscopeCtx.fillRect(0, 0, width, height);
+
+            // Enable additive blending
+            oscilloscopeCtx.globalCompositeOperation = "lighter";
+
+            // Draw left channel (red)
+            oscilloscopeCtx.beginPath();
+            oscilloscopeCtx.strokeStyle = '#ff0000';
+            for (let i = 0; i < oscilloscopeDataL.length; i++) {
+                const x = (i / oscilloscopeDataL.length) * width;
+                const y = height - (oscilloscopeDataL[i] * height);
+                if (i === 0) {
+                    oscilloscopeCtx.moveTo(x, y);
+                } else {
+                    oscilloscopeCtx.lineTo(x, y);
+                }
+            }
+            oscilloscopeCtx.stroke();
+
+            // Draw right channel (blue)
+            if (oscilloscopeDataR.some(v => v !== 0)) {
+                oscilloscopeCtx.beginPath();
+                oscilloscopeCtx.strokeStyle = '#0000ff';
+                for (let i = 0; i < oscilloscopeDataR.length; i++) {
+                    const x = (i / oscilloscopeDataR.length) * width;
+                    const y = height - (oscilloscopeDataR[i] * height);
+                    if (i === 0) {
+                        oscilloscopeCtx.moveTo(x, y);
+                    } else {
+                        oscilloscopeCtx.lineTo(x, y);
+                    }
+                }
+                oscilloscopeCtx.stroke();
+            }
+
+            // Restore default blending mode
+            oscilloscopeCtx.globalCompositeOperation = "source-over";
+        }
+
+        function drawOscilloscope() {
+            if (visualizationType === 'oscilloscope') {
+                drawScope()
+            } else if (visualizationType === 'spectrum') {
+                drawSpectrum(0);
+            } else if (visualizationType === 'spectrumLog') {
+                drawSpectrum(1);
+            }
+
+            if (oscilloscopeCanvas.matches(':hover')) {
+                putTriOnCanvas(isPlaying);
+            }
+        }
+        function putTriOnCanvas(on) {
+            const size = 18;
+            if (!on) {
+                oscilloscopeCtx.save();
+                oscilloscopeCtx.beginPath();
+                oscilloscopeCtx.moveTo(6, 6);
+                oscilloscopeCtx.lineTo(6 + size, 15);
+                oscilloscopeCtx.lineTo(6, 6 + size);
+                oscilloscopeCtx.closePath();
+                oscilloscopeCtx.fillStyle = '#fff';
+                oscilloscopeCtx.globalAlpha = 0.8;
+                oscilloscopeCtx.fill();
+                oscilloscopeCtx.restore();
+            } else {
+                // Draw pause icon (two vertical bars)
+                oscilloscopeCtx.save();
+                oscilloscopeCtx.globalAlpha = 0.8;
+                oscilloscopeCtx.fillStyle = '#fff';
+                // Left bar
+                oscilloscopeCtx.fillRect(6, 6, 5, 18);
+                // Right bar
+                oscilloscopeCtx.fillRect(18, 6, 5, 18);
+                oscilloscopeCtx.restore();
+            }
+        }
+
+        oscilloscopeCanvas.addEventListener('mousemove', function (e) {
+            drawOscilloscope();
+            putTriOnCanvas(isPlaying);
+        });
+        oscilloscopeCanvas.addEventListener('mouseleave', function (e) {
+            drawOscilloscope();
+        });
+
+        oscilloscopeCanvas.addEventListener('click', function (e) {
+            if (!isPlaying) {
+                startAudio()
+            } else {
+                pauseAudio()
+                drawOscilloscope()
+                putTriOnCanvas(isPlaying);
+            }
+        });
+
+        function saveAudio() {
+            const Rate = 48000; // Constant sample rate
+            const userFrequency = parseInt(frequencyInput.value);
+            let formula;
+            let isFuncBeat = (beatType === 'funcbeat');
+            let userFunc = null;
+
+            try {
+                if (isFuncBeat) {
+                    let code = editor.getValue();
+                    if (lastFuncbeatCode !== code || !userFunc) {
+                        // Only re-evaluate if code changed
+                        let funcFactory = new Function(code);
+                        userFunc = funcFactory();
+                        if (typeof userFunc !== 'function') throw new Error('FuncBeat: code must return a function');
+                        lastFuncbeatCode = code;
+                        lastValidFormula = userFunc;
+                        clearError();
+                    }
+                } else {
+                    formula = new Function('t', 'audio', 'wild', 'return ' + editor.getValue());
+                    clearError();
+                }
+            } catch (error) {
+                showError('Bytebeat Error: ' + error.message);
+                return;
+            }
+
+            let saveLength;
+            try {
+                const saveLengthExpression = saveLengthInput.value;
+                if (saveLengthExpression.toLowerCase().includes('audio_length')) {
+                    saveLength = floor(eval(saveLengthExpression.replace(/audio_length/g, audioBufferLength.toString())) / (userFrequency / Rate));
+                    saveLength = max(saveLength, floor(audioBufferLength / (userFrequency / Rate)));
+                } else {
+                    saveLength = floor(eval(saveLengthExpression) / (userFrequency / Rate));
+                }
+            } catch (error) {
+                showError('Invalid save length expression');
+                return;
+            }
+
+            const bufferL = new Float32Array(saveLength);
+            const bufferR = new Float32Array(saveLength);
+            const frequencyRatio = userFrequency / Rate;
+
+            try {
+                for (let i = 0; i < saveLength; i++) {
+                    const t = floor(i * frequencyRatio);
+                    let valueL, valueR;
+
+                    if (isFuncBeat) {
+                        let out;
+                        try {
+                            out = userFunc(t / userFrequency, userFrequency);
+                        } catch (error) {
+                            out = 0;
+                        }
+                        valueL = valueR = Math.max(-1, Math.min(1, out));
+                    } else {
+                        let result;
+                        try {
+                            const audioSample = [
+                                audioBufferDataL && t < audioBufferLength ? audioBufferDataL[t] : 0,
+                                audioBufferDataR && t < audioBufferLength ? audioBufferDataR[t] : 0
+                            ];
+                            result = formula(t, audioSample, 0);
+                            if (editor.getValue().includes('wild')) {
+                                result = [
+                                    formula(t, audioSample, 0),
+                                    formula(t, audioSample, 1)
+                                ];
+                            }
+                        } catch (error) {
+                            result = [0, 0];
+                        }
+                        if (Array.isArray(result) && result.length === 2) {
+                            valueL = processValue(result[0]);
+                            valueR = processValue(result[1]);
+                        } else {
+                            valueL = valueR = processValue(result);
+                        }
+                    }
+
+                    bufferL[i] = valueL;
+                    bufferR[i] = valueR;
+                }
+            } catch (error) {
+                showError('Bytebeat Error: ' + error.message);
+                return;
+            }
+
+            const wavBuffer = createWavBuffer(bufferL, bufferR, Rate);
+            downloadWav(wavBuffer);
+        }
+
+        function executeFormula(formula, t) {
+            try {
+                return formula(t);
+            } catch (error) {
+                handleFormulaError(error);
+                return lastValidFormula ? lastValidFormula(t) : [0, 0];
+            }
+        }
+
+        function handleFormulaError(error) {
+            if (error instanceof Error) {
+                const errorMessage = error.message.toLowerCase();
+                if (errorMessage.includes('throw')) {
+                    showError('thrown: ' + error.message, true);
+                } else {
+                    showError(error.message, true);
+                }
+            } else {
+                showError('thrown: ' + error, true);
+            }
+        }
+
+        function processResult(result) {
+            if (Array.isArray(result) && result.length === 2) {
+                return [processValue(result[0]), processValue(result[1])];
+            } else {
+                const value = processValue(result);
+                return [value, value];
+            }
+        }
+
+        function downloadWav(wavBuffer) {
+            const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'bytebeat.wav';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+
+        function createWavBuffer(samplesL, samplesR, sampleRate) {
+            const buffer = new ArrayBuffer(44 + samplesL.length * 4);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + samplesL.length * 4, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 2, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 4, true);
+            view.setUint16(32, 4, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, samplesL.length * 4, true);
+
+            floatTo16BitPCM(view, 44, samplesL, samplesR);
+
+            return buffer;
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        function floatTo16BitPCM(output, offset, inputL, inputR) {
+            for (let i = 0; i < inputL.length; i++, offset += 4) {
+                const sL = max(-1, min(1, inputL[i]));
+                const sR = max(-1, min(1, inputR[i]));
+                output.setInt16(offset, sL < 0 ? sL * 0x8000 : sL * 0x7FFF, true);
+                output.setInt16(offset + 2, sR < 0 ? sR * 0x8000 : sR * 0x7FFF, true);
+            }
+        }
+
+        function showError(message, isThrown = false) {
+            errorMessage.textContent = message;
+            errorMessage.style.opacity = '1';
+            errorMessage.style.color = message.toLowerCase().includes('throw') ? '#00ff00' : '#ff0000';
+            clearTimeout(errorTimeout);
+            errorTimeout = setTimeout(clearError, 5000);
+        }
+
+        function clearError() {
+            errorMessage.style.opacity = '0';
+            clearTimeout(errorTimeout);
+            errorTimeout = setTimeout(() => {
+                errorMessage.textContent = '';
+                errorMessage.style.color = '#ff0000';
+            }, 500);
+        }
+
+        function animationLoop() {
+            if (isPlaying) {
+                tValueInput.value = floor(smoothT);
+                drawOscilloscope();
+            }
+            requestAnimationFrame(animationLoop);
+        }
+        animationLoop();
+        
+        function generateId(code, frequency, beatType) {
+            try {
+                const data = {
+                    code: code,
+                    frequency: parseInt(frequency),
+                    beatType: beatType,
+                    saveLength: saveLengthInput.value
+                };
+                const jsonStr = JSON.stringify(data);
+                const encoded = encodeURIComponent(jsonStr);
+                return btoa(encoded)
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=/g, '.');
+            } catch (error) {
+                console.error('Error generating ID:', error);
+                return '';
+            }
+        }
+
+        function getDataFromId(id) {
+            try {
+                const base64 = id
+                    .replace(/-/g, '+')
+                    .replace(/_/g, '/')
+                    .replace(/\./g, '=');
+                const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+                const paddedBase64 = base64 + padding;
+                const decoded = decodeURIComponent(atob(paddedBase64));
+                const data = JSON.parse(decoded);
+                if (!data.code || !data.frequency || !data.beatType) {
+                    throw new Error('Invalid data format');
+                }
+                return {
+                    code: data.code,
+                    frequency: parseInt(data.frequency),
+                    beatType: data.beatType,
+                    saveLength: data.saveLength || null
+                };
+            } catch (error) {
+                console.error('Error parsing ID:', error);
+                return null;
+            }
+        }
+
+        function updateUrl() {
+            const code = editor.getValue();
+            const frequency = frequencyInput.value;
+            const id = generateId(code, frequency, beatType);
+            if (id) {
+                history.replaceState(null, '', `?id=${id}`);
+            }
+        }
+
+        function loadCodeFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            if (id) {
+                const data = getDataFromId(id);
+                if (data) {
+                    try {
+                        editor.setValue(data.code);
+                        frequencyInput.value = data.frequency;
+                        sampleRate = data.frequency;
+                        beatType = data.beatType;
+                        beatTypeSelect.value = data.beatType;
+                        if (data.saveLength) {
+                            saveLengthInput.value = data.saveLength; // <-- add this line
+                        }
+                        if (data.audioFileName) {
+                            audioFileLabel.textContent = data.audioFileName;
+                        }
+                        updateUrl();
+                    } catch (error) {
+                        console.error('Error loading code:', error);
+                        setDefaultCode();
+                    }
+                } else {
+                    setDefaultCode();
+                }
+            } else {
+                setDefaultCode();
+            }
+        }
+
+        function setDefaultCode() {
+            const defaultCode = 'f=tt=>br((tt+t*(6+((((t>>18&1?t>>(t>>18&1?13:12)&3:0)^(t>>(t>>18&1?14:13)&(-t>>(t>>18&1?15:14)&3?1:2)))+3)&3))/4|t>>6)/64)%256/3+((tt+t*(6+(t>>16&3))/8|(t>>6^t>>8))%256)/3+((3e5/(t%(2<<13)))&128)/3*2,[f(t/512),f(-t/512)]';
+            const defaultFreq = '32000';
+            const defaultBeatType = 'bytebeat';
+            
+            editor.setValue(defaultCode);
+            frequencyInput.value = defaultFreq;
+            sampleRate = parseInt(defaultFreq);
+            beatType = defaultBeatType;
+            beatTypeSelect.value = defaultBeatType;
+            
+            const defaultId = generateId(defaultCode, defaultFreq, defaultBeatType);
+            if (defaultId) {
+                history.replaceState(null, '', `?id=${defaultId}`);
+            }
+        }
+
+        function copyForDolchan() {
+            const code = editor.getValue();
+            const functions = {
+                br:   '(u,BTc=8)=>{let result=0;for(let i=0;i<BTc;i++){result+=((u&(pow(2,BTc)>>i+1))?(1<<i):0);}return result;}',
+                sinf: '(X)=>sin(X*PI/128)',
+                cosf: '(X)=>cos(X*PI/128)',
+                tanf: '(X)=>tan(X*PI/128)',
+                bitC: '(X,Y,Z) => X&Y?Z:0'
+            };
+
+            const usedFunctions = Object.keys(functions).filter(func => code.includes(func));
+            const functionDefinitions = usedFunctions.map(func => `${func}=${functions[func]}`).join(',');
+
+            const dolchanCode = functionDefinitions ? `${functionDefinitions},\n${code}` : code;
+
+            navigator.clipboard.writeText(dolchanCode).then(() => {
+                if (code.includes('audio')) {
+                    alert('Code copied for Dolchan!');
+                } else {
+                    alert('You need to add or make a function for audio :/');
+                }
+            }).catch(err => {
+                console.error('Failed to copy text: ', err); // how can you get this error bro
+            });
+        }
+
+        function copyForEnBeat() {
+            const code = editor.getValue();
+            navigator.clipboard.writeText(code).then(() => {
+                if (code.includes('audio')) {
+                    alert('Code copied for EnBeat!');
+                } else {
+                    alert('You need to add or make a function for audio :/');
+                }
+            }).catch(err => {
+                console.error('Failed to copy text: ', err); // how can you get this error bro
+            });
+        }
+
+        window.addEventListener('load', initializePage);
+
+        function initializePage() {
+            loadCodeFromUrl();
+        }
+    </script>
+</body>
+  </html>
